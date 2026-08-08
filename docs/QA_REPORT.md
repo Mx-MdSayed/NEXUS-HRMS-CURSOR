@@ -198,3 +198,42 @@ All items above addressed in Module 17 (and Module 16 unsaved-changes fix).
 - [x] Loading / error / empty states present in major modules  
 - [x] TypeScript + production build pass  
 - [x] Avoidable console errors addressed for Module 17 changes  
+
+---
+
+## Module 18 — Production UI/UX Polish (2026-08-08)
+
+**Branch:** `cursor/hrms-module18-ui-polish-d965`  
+**Scope:** Final polish — design consistency, navigation, accessibility foundations, documentation. No new business features.
+
+### UI/UX changes verified
+
+| Area | Result |
+| --- | --- |
+| Grouped sidebar navigation | Pass |
+| Header breadcrumbs + document titles | Pass |
+| Login page polish | Pass |
+| 403 / 404 / Error boundary | Pass |
+| Button loading states | Pass |
+| Modal / confirm dialog (destructive no accidental close) | Pass |
+| Dark mode token consistency | Pass (spot-checked) |
+| Print styles (payslip / reports) | Pass (existing + header hide) |
+| Tooltip sidebar (collapsed) | Pass |
+
+### Regression (spot-check)
+
+| Module | Result |
+| --- | --- |
+| Auth login / logout | Pass |
+| Build + TypeScript | Pass |
+| Lint | Pass (warnings only) |
+
+### Module 18 checklist (summary)
+
+- [x] Consistent navigation grouping  
+- [x] Browser page titles (`NX HRMS | …`)  
+- [x] Centralized route metadata  
+- [x] Production-safe error boundary  
+- [x] README + ARCHITECTURE + USER_ROLES + SETTINGS docs  
+- [x] No new `console.log` in `src/`  
+- [x] No hardcoded secrets introduced  

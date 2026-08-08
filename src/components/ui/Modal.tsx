@@ -12,6 +12,10 @@ export interface ModalProps {
   footer?: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl'
   showCloseButton?: boolean
+  /** When false, clicking the backdrop does not close the modal. */
+  closeOnBackdrop?: boolean
+  /** When false, Escape does not close the modal. */
+  closeOnEscape?: boolean
 }
 
 const sizeClasses = {
@@ -30,12 +34,14 @@ export function Modal({
   footer,
   size = 'md',
   showCloseButton = true,
+  closeOnBackdrop = true,
+  closeOnEscape = true,
 }: ModalProps) {
   useEffect(() => {
     if (!open) return
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape' && closeOnEscape) onClose()
     }
 
     document.addEventListener('keydown', onKeyDown)
@@ -45,7 +51,7 @@ export function Modal({
       document.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = ''
     }
-  }, [open, onClose])
+  }, [open, onClose, closeOnEscape])
 
   if (!open) return null
 
@@ -58,9 +64,9 @@ export function Modal({
     >
       <button
         type="button"
-        className="absolute inset-0 bg-surface-950/50 transition-opacity duration-150"
+        className="absolute inset-0 bg-surface-950/50 transition-opacity duration-150 motion-reduce:transition-none"
         aria-label="Close dialog"
-        onClick={onClose}
+        onClick={closeOnBackdrop ? onClose : undefined}
       />
       <div
         className={cn(

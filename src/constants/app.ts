@@ -1,5 +1,6 @@
 export const APP_NAME = 'Nexus HRMS'
 export const APP_SHORT_NAME = 'Nexus'
+export const PAGE_TITLE_PREFIX = 'NX HRMS'
 export const APP_TAGLINE = 'Human Resource Management System'
 export const APP_VERSION = '0.1.0'
 

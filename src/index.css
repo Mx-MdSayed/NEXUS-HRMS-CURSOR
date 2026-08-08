@@ -186,6 +186,31 @@
   .scrollbar-thin {
     scrollbar-width: thin;
   }
+
+  .page-container {
+    @apply mx-auto w-full max-w-[1600px] p-4 sm:p-6;
+  }
+
+  .page-header {
+    @apply mb-6;
+  }
+
+  .motion-reduce\:transition-none {
+    @media (prefers-reduced-motion: reduce) {
+      transition: none !important;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media print {
@@ -202,7 +227,10 @@
 
   aside,
   header,
-  .no-print {
+  nav[aria-label='Main'],
+  .no-print,
+  button,
+  .page-header {
     display: none !important;
   }
 

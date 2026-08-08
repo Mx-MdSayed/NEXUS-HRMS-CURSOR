@@ -1,6 +1,7 @@
 export {
   APP_NAME,
   APP_SHORT_NAME,
+  PAGE_TITLE_PREFIX,
   APP_TAGLINE,
   APP_VERSION,
   THEME_STORAGE_KEY,
@@ -15,6 +16,12 @@ export {
   MIN_PASSWORD_LENGTH,
 } from './app'
 export { ESS_NAVIGATION_ITEMS, NAVIGATION_ITEMS } from './navigation'
+export {
+  NAVIGATION_GROUP_LABELS,
+  NAVIGATION_GROUP_ORDER,
+  type NavigationGroupId,
+} from './navigationGroups'
+export { getRouteMeta, type RouteMeta } from './routeMeta'
 export { ROLE_LABELS, ROLE_LIST, ROLES } from './roles'
 export { ALL_PERMISSIONS, PERMISSIONS } from './permissions'
 export { ROLE_PERMISSIONS, getPermissionsForRole } from './rbac'

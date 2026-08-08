@@ -1,5 +1,7 @@
 export { cn } from './cn'
 export { formatDate, formatRelativeDate, formatDateTime } from './date'
 export { formatCurrency } from './currency'
+export { formatNumber, formatInteger } from './number'
+export { formatPageTitle } from './pageTitle'
 export { formatEmploymentStatus, formatRole, toTitleCase } from './status'
 export { showSuccess, showError, showInfo, showWarning } from './toast'

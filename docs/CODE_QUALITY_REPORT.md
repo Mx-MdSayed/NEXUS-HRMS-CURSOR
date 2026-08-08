@@ -91,3 +91,34 @@ Recommended next engineering steps (post Module 17, not implemented here):
 2. Collapse legacy payroll/payslip settings pages into Module 16 settings  
 3. Introduce route-based code splitting for bundle size  
 4. Replace demo auth with real API while keeping the same permission contracts  
+
+---
+
+## Module 18 — UI/UX Polish (2026-08-08)
+
+**Branch:** `cursor/hrms-module18-ui-polish-d965`
+
+### Additions
+
+- `src/constants/navigationGroups.ts` — sidebar section labels  
+- `src/constants/routeMeta.ts` — browser title + breadcrumb metadata  
+- `src/hooks/useDocumentTitle.ts`, `useRouteMeta.ts`, `useUnsavedChangesWarning.ts`  
+- `src/utils/pageTitle.ts`, `src/utils/number.ts`  
+- `docs/ARCHITECTURE.md`, `docs/USER_ROLES.md`, `docs/SETTINGS.md`  
+
+### Refinements
+
+- Sidebar: grouped nav (Main, People, Payroll, Management, System, Account)  
+- Header: route breadcrumbs, compact layout, profile menu order  
+- `PageHeader`: clickable breadcrumb links  
+- `Button`: `loadingLabel` for async feedback  
+- `Modal` / `ConfirmDialog`: disable backdrop/Escape close for destructive confirms  
+- `Tooltip`: left/right placement for collapsed sidebar  
+- `index.css`: page layout utilities, reduced-motion, print header hide  
+- `ErrorBoundary`: no internal error text in UI  
+
+### Quality gates
+
+- `npm run build` — pass  
+- `npm run lint` — pass (pre-existing hook warnings only)  
+- No `console.log` added in application code  

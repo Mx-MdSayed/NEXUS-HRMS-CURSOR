@@ -17,6 +17,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize
   isLoading?: boolean
   loading?: boolean
+  /** Shown while loading instead of children (e.g. "Saving…"). */
+  loadingLabel?: string
   leftIcon?: ReactNode
   rightIcon?: ReactNode
   iconOnly?: boolean
@@ -68,6 +70,7 @@ export function Button({
   size = 'md',
   isLoading = false,
   loading = false,
+  loadingLabel,
   leftIcon,
   rightIcon,
   iconOnly = false,
@@ -95,7 +98,10 @@ export function Button({
       {...props}
     >
       {busy ? (
-        <ButtonSpinner />
+        <>
+          <ButtonSpinner />
+          {!iconOnly && loadingLabel ? <span>{loadingLabel}</span> : null}
+        </>
       ) : iconOnly ? (
         (leftIcon ?? rightIcon ?? children)
       ) : (
