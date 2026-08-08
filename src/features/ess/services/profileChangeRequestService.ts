@@ -1,0 +1,85 @@
+import type { ProfileChangeRequest } from '../types'
+import { EssServiceError } from './errors'
+
+let requestsDb: ProfileChangeRequest[] = []
+
+function delay(ms = 120): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
+}
+
+function clone<T>(value: T): T {
+  return structuredClone(value)
+}
+
+export const profileChangeRequestService = {
+  async createRequest(
+    input: {
+      employeeId: string
+      field: string
+      currentValue?: string
+      requestedValue: string
+      reason: string
+    },
+    actorName = 'System',
+  ): Promise<ProfileChangeRequest> {
+    await delay()
+    if (!input.field.trim()) throw new EssServiceError('VALIDATION', 'Field is required.')
+    if (!input.requestedValue.trim()) {
+      throw new EssServiceError('VALIDATION', 'Requested value is required.')
+    }
+    if (!input.reason.trim()) throw new EssServiceError('VALIDATION', 'Reason is required.')
+
+    const existing = requestsDb.find(
+      (item) =>
+        item.employeeId === input.employeeId &&
+        item.field.toLowerCase() === input.field.toLowerCase() &&
+        item.status === 'pending',
+    )
+    if (existing) {
+      throw new EssServiceError('CONFLICT', 'A pending change request already exists for this field.')
+    }
+
+    const request: ProfileChangeRequest = {
+      id: `pcr-${crypto.randomUUID().slice(0, 8)}`,
+      employeeId: input.employeeId,
+      field: input.field.trim(),
+      currentValue: input.currentValue?.trim() || undefined,
+      requestedValue: input.requestedValue.trim(),
+      reason: input.reason.trim(),
+      status: 'pending',
+      requestedAt: new Date().toISOString(),
+      requestedBy: actorName,
+    }
+    requestsDb = [request, ...requestsDb]
+    return clone(request)
+  },
+
+  async getMyRequests(employeeId: string): Promise<ProfileChangeRequest[]> {
+    await delay()
+    return clone(
+      requestsDb
+        .filter((item) => item.employeeId === employeeId)
+        .sort((a, b) => b.requestedAt.localeCompare(a.requestedAt)),
+    )
+  },
+
+  async getRequestById(employeeId: string, id: string): Promise<ProfileChangeRequest> {
+    await delay()
+    const request = requestsDb.find((item) => item.id === id && item.employeeId === employeeId)
+    if (!request) throw new EssServiceError('NOT_FOUND', 'Profile change request not found.')
+    return clone(request)
+  },
+
+  async cancelRequest(employeeId: string, id: string): Promise<ProfileChangeRequest> {
+    await delay()
+    const index = requestsDb.findIndex((item) => item.id === id && item.employeeId === employeeId)
+    if (index < 0) throw new EssServiceError('NOT_FOUND', 'Profile change request not found.')
+    const request = requestsDb[index]
+    if (request.status !== 'pending') {
+      throw new EssServiceError('VALIDATION', 'Only pending profile change requests can be cancelled.')
+    }
+    const updated = { ...request, status: 'cancelled' as const }
+    requestsDb[index] = updated
+    return clone(updated)
+  },
+}

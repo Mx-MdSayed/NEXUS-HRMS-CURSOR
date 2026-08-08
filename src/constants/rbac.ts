@@ -68,6 +68,7 @@ export const ROLE_PERMISSIONS: Record<RoleName, PermissionName[]> = {
     PERMISSIONS.NOTIFICATION_VIEW,
     PERMISSIONS.NOTIFICATION_MANAGE,
     PERMISSIONS.USER_VIEW,
+    PERMISSIONS.ESS_VIEW,
     // Intentionally excludes settings.manage and user create/edit/delete
     // and does not grant Super Admin exclusive controls.
   ],
@@ -85,6 +86,7 @@ export const ROLE_PERMISSIONS: Record<RoleName, PermissionName[]> = {
     PERMISSIONS.SALARY_VIEW,
     PERMISSIONS.PAYSLIP_VIEW,
     PERMISSIONS.NOTIFICATION_VIEW,
+    PERMISSIONS.ESS_VIEW,
   ],
 }
 

@@ -1,0 +1,17 @@
+export {
+  EssAttendanceCalendarPage,
+  EssAttendancePage,
+  EssDashboardPage,
+  EssDocumentsPage,
+  EssLeaveApplyPage,
+  EssLeaveDetailPage,
+  EssLeavePage,
+  EssNotificationsPage,
+  EssPayslipDetailPage,
+  EssPayslipsPage,
+  EssProfilePage,
+  EssRequestDetailPage,
+  EssRequestsPage,
+  EssSalaryPage,
+  EssSettingsPage,
+} from './EssPages'

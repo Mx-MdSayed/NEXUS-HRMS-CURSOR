@@ -68,6 +68,7 @@ export type PermissionName =
   | 'user.delete'
   | 'settings.view'
   | 'settings.manage'
+  | 'ess.view'
 
 export type EmploymentStatus =
   | 'active'
@@ -116,6 +117,8 @@ export interface NavigationItem {
   label: string
   /** Label used for employee self-service navigation when provided. */
   selfServiceLabel?: string
+  /** Route used when the item is rendered in the employee self-service portal. */
+  selfServicePath?: string
   path: string
   icon: string
   module?: string

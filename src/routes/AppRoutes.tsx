@@ -67,6 +67,23 @@ import {
   PayslipSettingsPage,
   PayslipsPage,
 } from '@/features/payslip'
+import {
+  EssAttendanceCalendarPage,
+  EssAttendancePage,
+  EssDashboardPage,
+  EssDocumentsPage,
+  EssLeaveApplyPage,
+  EssLeaveDetailPage,
+  EssLeavePage,
+  EssNotificationsPage,
+  EssPayslipDetailPage,
+  EssPayslipsPage,
+  EssProfilePage,
+  EssRequestDetailPage,
+  EssRequestsPage,
+  EssSalaryPage,
+  EssSettingsPage,
+} from '@/features/ess'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -123,6 +140,135 @@ export function AppRoutes() {
           element={
             <PermissionRoute permission={PERMISSIONS.DASHBOARD_VIEW}>
               <DashboardPage />
+            </PermissionRoute>
+          }
+        />
+        <Route path="employee" element={<Navigate to="/employee/dashboard" replace />} />
+        <Route
+          path="employee/dashboard"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssDashboardPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/profile"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssProfilePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/attendance"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssAttendancePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/attendance/calendar"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssAttendanceCalendarPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/leave"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssLeavePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/leave/apply"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssLeaveApplyPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/leave/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssLeaveDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/salary"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssSalaryPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/payslips"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssPayslipsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/payslips/:id/print"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <PayslipPrintPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/payslips/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssPayslipDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/documents"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssDocumentsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/requests"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssRequestsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/requests/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssRequestDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/notifications"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssNotificationsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employee/settings"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ESS_VIEW}>
+              <EssSettingsPage />
             </PermissionRoute>
           }
         />

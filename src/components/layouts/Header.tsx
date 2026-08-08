@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell, KeyRound, LogOut, Menu, Moon, Settings, Sun, UserRound } from 'lucide-react'
 import { APP_NAME, NAVIGATION_ITEMS } from '@/constants'
 import { PERMISSIONS } from '@/constants/permissions'
+import { ROLES } from '@/constants/roles'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSidebar } from '@/contexts/SidebarContext'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -24,7 +25,8 @@ export function Header() {
   const navigate = useNavigate()
   const { toggleCollapsed, openMobile, isCollapsed } = useSidebar()
   const { isDark, toggleTheme } = useTheme()
-  const { user, logout, hasPermission } = useAuth()
+  const { user, logout, hasPermission, hasRole } = useAuth()
+  const isEmployeeUser = hasRole(ROLES.EMPLOYEE)
 
   const fullName = user?.name ?? 'User'
   const roleLabel = user ? formatRole(user.role) : ''
@@ -34,13 +36,13 @@ export function Header() {
       id: 'profile',
       label: 'My Profile',
       icon: <UserRound className="h-4 w-4" />,
-      onClick: () => navigate('/profile'),
+      onClick: () => navigate(isEmployeeUser ? '/employee/profile' : '/profile'),
     },
     {
       id: 'change-password',
       label: 'Change Password',
       icon: <KeyRound className="h-4 w-4" />,
-      onClick: () => navigate('/change-password'),
+      onClick: () => navigate(isEmployeeUser ? '/employee/settings' : '/change-password'),
     },
     ...(hasPermission(PERMISSIONS.SETTINGS_VIEW)
       ? [
@@ -48,7 +50,7 @@ export function Header() {
             id: 'settings',
             label: 'Settings',
             icon: <Settings className="h-4 w-4" />,
-            onClick: () => navigate('/settings'),
+            onClick: () => navigate(isEmployeeUser ? '/employee/settings' : '/settings'),
           },
         ]
       : []),
@@ -118,7 +120,7 @@ export function Header() {
               size="sm"
               className="relative !px-2"
               aria-label="Notifications"
-              onClick={() => navigate('/notifications')}
+              onClick={() => navigate(isEmployeeUser ? '/employee/notifications' : '/notifications')}
             >
               <Bell className="h-4 w-4" />
               <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary-500" aria-hidden />

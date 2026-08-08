@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { ErrorState } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
 import { ROLES } from '@/constants/roles'
@@ -46,6 +47,10 @@ export function DashboardPage() {
   }, [loadDashboard])
 
   const userName = user?.firstName ?? user?.name ?? 'there'
+
+  if (isEmployeeUser) {
+    return <Navigate to="/employee/dashboard" replace />
+  }
 
   return (
     <div>

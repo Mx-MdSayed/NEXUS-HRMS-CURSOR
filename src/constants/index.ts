@@ -14,7 +14,7 @@ export {
   AUTH_SESSION_TTL_REMEMBER_MS,
   MIN_PASSWORD_LENGTH,
 } from './app'
-export { NAVIGATION_ITEMS } from './navigation'
+export { ESS_NAVIGATION_ITEMS, NAVIGATION_ITEMS } from './navigation'
 export { ROLE_LABELS, ROLE_LIST, ROLES } from './roles'
 export { ALL_PERMISSIONS, PERMISSIONS } from './permissions'
 export { ROLE_PERMISSIONS, getPermissionsForRole } from './rbac'

@@ -15,6 +15,7 @@ Professional Basic-to-Mid-Level Human Resource Management System.
 - **Module 9** — Salary structure & compensation (complete)
 - **Module 10** — Payroll management (complete)
 - **Module 11** — Payslip & salary document management (complete)
+- **Module 12** — Employee Self-Service (ESS) portal (complete)
 
 ## Getting started
 
@@ -52,7 +53,7 @@ These credentials exist only in the development mock auth adapter and must never
 Role-aware dashboard at `/dashboard`:
 
 - Admin / HR Admin → organization overview (KPIs, charts, leave, payroll summary)
-- Employee → personal HR overview only
+- Employee → redirected to ESS portal at `/employee/dashboard`
 
 Dashboard data currently comes from a mock `dashboardService` and is ready to swap for real APIs later.
 

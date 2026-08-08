@@ -1,0 +1,48 @@
+import type { EmployeeDocument } from '../types'
+
+export const initialEssDocuments: EmployeeDocument[] = [
+  {
+    id: 'ess-doc-1003-appointment',
+    employeeId: 'emp-1003',
+    title: 'Appointment Letter',
+    description: 'Signed appointment letter issued at joining.',
+    category: 'employment',
+    fileName: 'eden-employee-appointment-letter.pdf',
+    fileType: 'application/pdf',
+    issuedAt: '2023-08-14',
+    href: '#',
+  },
+  {
+    id: 'ess-doc-1003-contract',
+    employeeId: 'emp-1003',
+    title: 'Employment Contract',
+    description: 'Current employment agreement and terms.',
+    category: 'employment',
+    fileName: 'eden-employee-contract.pdf',
+    fileType: 'application/pdf',
+    issuedAt: '2023-08-14',
+    href: '#',
+  },
+  {
+    id: 'ess-doc-1003-policy',
+    employeeId: 'emp-1003',
+    title: 'Employee Handbook',
+    description: 'Company policies and self-service guidance.',
+    category: 'policy',
+    fileName: 'employee-handbook.pdf',
+    fileType: 'application/pdf',
+    issuedAt: '2026-01-01',
+    href: '#',
+  },
+  {
+    id: 'ess-doc-1003-payslip-placeholder',
+    employeeId: 'emp-1003',
+    title: 'Payslip Archive',
+    description: 'Historical payslips are available in My Payslips.',
+    category: 'salary',
+    fileName: 'payslip-archive.txt',
+    fileType: 'text/plain',
+    issuedAt: '2026-07-31',
+    href: '/employee/payslips',
+  },
+]

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
-import { APP_NAME, APP_SHORT_NAME, NAVIGATION_ITEMS } from '@/constants'
+import { APP_NAME, APP_SHORT_NAME, ESS_NAVIGATION_ITEMS, NAVIGATION_ITEMS } from '@/constants'
 import { ROLES } from '@/constants/roles'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSidebar } from '@/contexts/SidebarContext'
@@ -33,24 +33,26 @@ function NavItems({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: 
   const isEmployeeUser = hasRole(ROLES.EMPLOYEE)
 
   const visibleItems = useMemo(
-    () =>
-      NAVIGATION_ITEMS.filter((item) => {
+    () => {
+      const items = isEmployeeUser ? ESS_NAVIGATION_ITEMS : NAVIGATION_ITEMS
+      return items.filter((item) => {
         if (!item.requiredPermission) return true
         return hasPermission(item.requiredPermission)
-      }),
-    [hasPermission],
+      })
+    },
+    [hasPermission, isEmployeeUser],
   )
 
   return (
     <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4 scrollbar-thin" aria-label="Main">
       {visibleItems.map((item) => {
         const Icon = getNavIcon(item.icon)
-        const label =
-          isEmployeeUser && item.selfServiceLabel ? item.selfServiceLabel : item.label
+        const label = isEmployeeUser && item.selfServiceLabel ? item.selfServiceLabel : item.label
+        const path = isEmployeeUser && item.selfServicePath ? item.selfServicePath : item.path
 
         const link = (
           <NavLink
-            to={item.path}
+            to={path}
             onClick={onNavigate}
             className={({ isActive }) =>
               cn(

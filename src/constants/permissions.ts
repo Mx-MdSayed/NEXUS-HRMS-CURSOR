@@ -68,6 +68,7 @@ export const PERMISSIONS = {
   USER_DELETE: 'user.delete',
   SETTINGS_VIEW: 'settings.view',
   SETTINGS_MANAGE: 'settings.manage',
+  ESS_VIEW: 'ess.view',
 } as const satisfies Record<string, PermissionName>
 
 export const ALL_PERMISSIONS: PermissionName[] = Object.values(PERMISSIONS)
