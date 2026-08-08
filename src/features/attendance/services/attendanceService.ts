@@ -260,8 +260,10 @@ export const attendanceService = {
     stats: EmployeeAttendanceStats
   }> {
     await delay()
-    if (actor?.role === ROLES.EMPLOYEE && actor.employeeId && actor.employeeId !== employeeId) {
-      throw new AttendanceServiceError('UNAUTHORIZED', 'You can only view your own attendance.')
+    if (actor?.role === ROLES.EMPLOYEE) {
+      if (!actor.employeeId || actor.employeeId !== employeeId) {
+        throw new AttendanceServiceError('UNAUTHORIZED', 'You can only view your own attendance.')
+      }
     }
 
     const employees = await getActiveEmployees()
@@ -311,8 +313,10 @@ export const attendanceService = {
     actor?: { employeeId?: string; role?: RoleName },
   ): Promise<CalendarDayAttendance[]> {
     await delay()
-    if (actor?.role === ROLES.EMPLOYEE && actor.employeeId && actor.employeeId !== employeeId) {
-      throw new AttendanceServiceError('UNAUTHORIZED', 'You can only view your own attendance.')
+    if (actor?.role === ROLES.EMPLOYEE) {
+      if (!actor.employeeId || actor.employeeId !== employeeId) {
+        throw new AttendanceServiceError('UNAUTHORIZED', 'You can only view your own attendance.')
+      }
     }
 
     const records = await this.getAttendanceByEmployee(employeeId, monthKey)

@@ -581,10 +581,21 @@ export const leaveService = {
     }
   },
 
-  async getLeaveRequestById(id: string): Promise<LeaveRequestDetail> {
+  async getLeaveRequestById(
+    id: string,
+    actor?: { employeeId?: string | null; canManageOrApprove?: boolean },
+  ): Promise<LeaveRequestDetail> {
     await delay()
     const request = requestsDb.find((item) => item.id === id)
     if (!request) throw new LeaveServiceError('NOT_FOUND', 'Leave request not found.')
+    if (
+      actor &&
+      !actor.canManageOrApprove &&
+      actor.employeeId &&
+      request.employeeId !== actor.employeeId
+    ) {
+      throw new LeaveServiceError('UNAUTHORIZED', 'You can only view your own leave requests.')
+    }
     const list = await toListItem(request)
     const year = Number(request.startDate.slice(0, 4))
     const balance = findBalance(request.employeeId, request.leaveTypeId, year)
@@ -703,13 +714,20 @@ export const leaveService = {
     }
   },
 
-  async approveLeaveRequest(id: string, actorName = 'System'): Promise<LeaveRequest> {
+  async approveLeaveRequest(
+    id: string,
+    actorName = 'System',
+    options?: { actorEmployeeId?: string },
+  ): Promise<LeaveRequest> {
     await delay()
     const index = requestsDb.findIndex((item) => item.id === id)
     if (index < 0) throw new LeaveServiceError('NOT_FOUND', 'Leave request not found.')
     const request = requestsDb[index]
     if (request.status !== LEAVE_REQUEST_STATUSES.PENDING) {
       throw new LeaveServiceError('VALIDATION', 'Only pending requests can be approved.')
+    }
+    if (options?.actorEmployeeId && options.actorEmployeeId === request.employeeId) {
+      throw new LeaveServiceError('UNAUTHORIZED', 'You cannot approve your own leave request.')
     }
 
     const leaveType = getLeaveTypeOrThrow(request.leaveTypeId)
@@ -773,6 +791,7 @@ export const leaveService = {
     id: string,
     reason: string,
     actorName = 'System',
+    options?: { actorEmployeeId?: string },
   ): Promise<LeaveRequest> {
     await delay()
     if (!reason?.trim()) {
@@ -783,6 +802,9 @@ export const leaveService = {
     const request = requestsDb[index]
     if (request.status !== LEAVE_REQUEST_STATUSES.PENDING) {
       throw new LeaveServiceError('VALIDATION', 'Only pending requests can be rejected.')
+    }
+    if (options?.actorEmployeeId && options.actorEmployeeId === request.employeeId) {
+      throw new LeaveServiceError('UNAUTHORIZED', 'You cannot reject your own leave request.')
     }
 
     const leaveType = getLeaveTypeOrThrow(request.leaveTypeId)

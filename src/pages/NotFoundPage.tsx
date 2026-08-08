@@ -1,9 +1,17 @@
 import { useNavigate } from 'react-router-dom'
 import { SearchX } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
+import { ROLES } from '@/constants/roles'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function NotFoundPage() {
   const navigate = useNavigate()
+  const { hasRole, isAuthenticated } = useAuth()
+  const home = !isAuthenticated
+    ? '/login'
+    : hasRole(ROLES.EMPLOYEE)
+      ? '/employee/dashboard'
+      : '/dashboard'
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center p-4">
@@ -17,8 +25,8 @@ export function NotFoundPage() {
           <p className="mt-2 max-w-sm text-sm text-surface-500 dark:text-surface-400">
             The page you are looking for doesn&apos;t exist or may have been moved.
           </p>
-          <Button className="mt-6" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
+          <Button className="mt-6" onClick={() => navigate(home)}>
+            {isAuthenticated ? 'Back to Dashboard' : 'Back to Login'}
           </Button>
         </CardContent>
       </Card>

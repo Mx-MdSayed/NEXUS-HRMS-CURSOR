@@ -56,6 +56,7 @@ export function EmployeeAttendancePage() {
 
   useEffect(() => {
     if (!employeeId) return
+    if (isEmployee && !selfId) return
     let active = true
     setIsLoading(true)
     setHasError(false)

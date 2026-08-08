@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/components/layouts'
 import { PERMISSIONS } from '@/constants/permissions'
+import { ROLES } from '@/constants/roles'
 import {
   EmployeeCreatePage,
   EmployeeDirectoryGuard,
@@ -1224,7 +1225,14 @@ export function AppRoutes() {
           }
         />
         <Route path="change-password" element={<ChangePasswordPage />} />
-        <Route path="ui-preview" element={<UiPreviewPage />} />
+        <Route
+          path="ui-preview"
+          element={
+            <PermissionRoute role={ROLES.SUPER_ADMIN}>
+              <UiPreviewPage />
+            </PermissionRoute>
+          }
+        />
         <Route path="403" element={<AccessDeniedPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

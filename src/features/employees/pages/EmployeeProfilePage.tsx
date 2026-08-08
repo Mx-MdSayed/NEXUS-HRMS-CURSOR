@@ -78,7 +78,7 @@ export function EmployeeProfilePage() {
     setIsLoading(true)
     setHasError(false)
     try {
-      const record = await employeeService.getEmployeeById(id)
+      const record = await employeeService.getEmployeeById(id, user)
       setEmployee(record)
       const [departments, designations, managers] = await Promise.all([
         employeeService.getDepartments(),

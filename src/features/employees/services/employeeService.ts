@@ -1,5 +1,6 @@
 import { DEFAULT_PAGE_SIZE } from '@/constants/app'
 import { ROLES } from '@/constants/roles'
+import { accessScopeService } from '@/features/access-control/services/accessScopeService'
 import { DEV_AUTH_ACCOUNTS } from '@/services/auth/devAuthConfig'
 import {
   getDepartmentByIdSync,
@@ -10,6 +11,7 @@ import {
   listActiveDesignationOptions,
 } from '@/features/organization/data/orgDb'
 import type { DepartmentOption, DesignationOption } from '@/features/organization/types'
+import type { User } from '@/types'
 import { buildFullName } from '../utils/format'
 import { initialEmployees } from '../data/mockEmployees'
 import type {
@@ -311,11 +313,14 @@ export const employeeService = {
     return { data, total, page: safePage, pageSize, totalPages }
   },
 
-  async getEmployeeById(id: string): Promise<Employee> {
+  async getEmployeeById(id: string, actor?: User | null): Promise<Employee> {
     await delay()
     const employee = employeesDb.find((item) => item.id === id && !item.isDeleted)
     if (!employee) {
       throw new EmployeeServiceError('NOT_FOUND', 'Employee not found.')
+    }
+    if (actor && !accessScopeService.canAccessEmployee(actor, employee.id, employee.departmentId)) {
+      throw new EmployeeServiceError('UNAUTHORIZED', 'You do not have access to this employee.')
     }
     return structuredClone(employee)
   },

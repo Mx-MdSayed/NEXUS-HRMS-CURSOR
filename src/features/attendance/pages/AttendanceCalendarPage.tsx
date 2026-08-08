@@ -29,6 +29,7 @@ export function AttendanceCalendarPage() {
   const isEmployee = hasRole(ROLES.EMPLOYEE)
   const [monthKey, setMonthKey] = useState(format(new Date('2026-08-08'), 'yyyy-MM'))
   const [employeeId, setEmployeeId] = useState('')
+  const [selfId, setSelfId] = useState<string | null>(null)
   const [employees, setEmployees] = useState<Array<{ id: string; label: string }>>([])
   const [days, setDays] = useState<CalendarDayAttendance[]>([])
   const [selectedDate, setSelectedDate] = useState<string | undefined>()
@@ -39,6 +40,7 @@ export function AttendanceCalendarPage() {
   useEffect(() => {
     if (isEmployee && user) {
       void attendanceService.resolveLinkedEmployeeId(user).then((id) => {
+        setSelfId(id)
         if (id) setEmployeeId(id)
       })
       return
@@ -55,13 +57,14 @@ export function AttendanceCalendarPage() {
 
   useEffect(() => {
     if (!employeeId) return
+    if (isEmployee && !selfId) return
     let active = true
     setIsLoading(true)
     setHasError(false)
     void attendanceService
       .getCalendarAttendance(employeeId, monthKey, {
         role: user?.role,
-        employeeId: isEmployee ? employeeId : undefined,
+        employeeId: isEmployee ? selfId ?? undefined : undefined,
       })
       .then((result) => {
         if (!active) return
@@ -80,7 +83,7 @@ export function AttendanceCalendarPage() {
     return () => {
       active = false
     }
-  }, [employeeId, isEmployee, monthKey, user?.role])
+  }, [employeeId, isEmployee, monthKey, selfId, user?.role])
 
   const selected = days.find((item) => item.date === selectedDate)
 

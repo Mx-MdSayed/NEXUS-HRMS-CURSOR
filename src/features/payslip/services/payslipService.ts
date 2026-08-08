@@ -1,7 +1,9 @@
 import type { SalaryCurrencyCode } from '@/constants/currencies'
+import { accessScopeService } from '@/features/access-control/services/accessScopeService'
 import { employeeService } from '@/features/employees/services/employeeService'
 import { payrollService, type PayrollEmployee, type PayrollRun } from '@/features/payroll'
 import { getPeriodBounds } from '@/features/payroll/utils/calculations'
+import type { User } from '@/types'
 import { getCompanyProfile } from '../company'
 import type {
   BulkGenerationPreview,
@@ -229,10 +231,14 @@ export const payslipService = {
     )
   },
 
-  async getPayslipById(id: string): Promise<Payslip> {
+  async getPayslipById(id: string, actor?: User | null): Promise<Payslip> {
     await ensureSeeded()
     await delay(100)
-    return structuredClone(getPayslipOrThrow(id))
+    const row = structuredClone(getPayslipOrThrow(id))
+    if (actor && !accessScopeService.canAccessPayslip(actor, row.employeeId)) {
+      throw new PayslipServiceError('UNAUTHORIZED', 'You can only view payslips you are authorized to access.')
+    }
+    return row
   },
 
   async getEmployeePayslips(employeeId: string): Promise<Payslip[]> {

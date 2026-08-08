@@ -49,12 +49,10 @@ export function LeaveDetailPage() {
     try {
       const linked = await leaveService.resolveLinkedEmployeeId(user ?? undefined)
       setLinkedEmployeeId(linked)
-      const data = await leaveService.getLeaveRequestById(id)
-      if (!canManage && !canApprove && data.employeeId !== linked) {
-        setError('You can only view your own leave requests.')
-        setDetail(null)
-        return
-      }
+      const data = await leaveService.getLeaveRequestById(id, {
+        employeeId: linked,
+        canManageOrApprove: canManage || canApprove,
+      })
       setDetail(data)
     } catch (err) {
       setError(getLeaveErrorMessage(err, 'Leave request not found.'))
@@ -94,10 +92,10 @@ export function LeaveDetailPage() {
                 Edit
               </Button>
             ) : null}
-            {isPending && canApprove ? (
+            {isPending && canApprove && !isOwner ? (
               <Button onClick={() => setApproveOpen(true)}>Approve</Button>
             ) : null}
-            {isPending && canReject ? (
+            {isPending && canReject && !isOwner ? (
               <Button variant="danger" onClick={() => setRejectOpen(true)}>
                 Reject
               </Button>
@@ -243,7 +241,9 @@ export function LeaveDetailPage() {
         onConfirm={async () => {
           setActionLoading(true)
           try {
-            await leaveService.approveLeaveRequest(detail.id, user?.name ?? 'System')
+            await leaveService.approveLeaveRequest(detail.id, user?.name ?? 'System', {
+              actorEmployeeId: linkedEmployeeId ?? undefined,
+            })
             showSuccess('Leave request approved.')
             setApproveOpen(false)
             await load()
@@ -274,6 +274,7 @@ export function LeaveDetailPage() {
                     detail.id,
                     rejectReason,
                     user?.name ?? 'System',
+                    { actorEmployeeId: linkedEmployeeId ?? undefined },
                   )
                   showSuccess('Leave request rejected.')
                   setRejectOpen(false)

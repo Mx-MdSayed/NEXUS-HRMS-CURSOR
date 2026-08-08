@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom'
 import { Card, CardContent, ErrorState, PageHeader, PageLoader } from '@/components/ui'
 import { ROLES } from '@/constants/roles'
 import { useAuth } from '@/contexts/AuthContext'
-import { attendanceService } from '@/features/attendance/services/attendanceService'
 import { PayslipActions } from '../components/PayslipActions'
 import { PayslipTemplate } from '../components/PayslipTemplate'
 import { payslipService } from '../services/payslipService'
@@ -22,15 +21,7 @@ export function PayslipDetailPage() {
     setIsLoading(true)
     setError(null)
     try {
-      const row = await payslipService.getPayslipById(id)
-      if (user?.role === ROLES.EMPLOYEE) {
-        const linkedEmployeeId = await attendanceService.resolveLinkedEmployeeId(user)
-        if (!linkedEmployeeId || linkedEmployeeId !== row.employeeId) {
-          setError('You can only view your own payslips.')
-          setPayslip(null)
-          return
-        }
-      }
+      const row = await payslipService.getPayslipById(id, user)
       setPayslip(row)
     } catch (err) {
       setError(getPayslipErrorMessage(err, 'Failed to load payslip.'))

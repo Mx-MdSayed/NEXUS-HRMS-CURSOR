@@ -62,21 +62,25 @@ export function AttendanceSummaryPage() {
   }, [isEmployee, user])
 
   const load = useCallback(async () => {
+    if (isEmployee && !selfId) return
     setIsLoading(true)
     setHasError(false)
     try {
-      const result = await attendanceService.getAttendanceSummary(filters)
+      const scopedFilters =
+        isEmployee && selfId ? { ...filters, employeeId: selfId } : filters
+      const result = await attendanceService.getAttendanceSummary(scopedFilters)
       setRows(result.rows)
     } catch {
       setHasError(true)
     } finally {
       setIsLoading(false)
     }
-  }, [filters])
+  }, [filters, isEmployee, selfId])
 
   useEffect(() => {
+    if (isEmployee && !selfId) return
     void load()
-  }, [load])
+  }, [isEmployee, load, selfId])
 
   return (
     <div className="space-y-6">

@@ -189,7 +189,7 @@ export function LeaveRequestsPage() {
             <TableBody>
               {rows.map((row) => {
                 const moreItems = [
-                  ...(canApprove && row.status === 'pending'
+                  ...(canApprove && row.status === 'pending' && row.employeeId !== employeeId
                     ? [
                         {
                           id: 'approve',
@@ -198,7 +198,7 @@ export function LeaveRequestsPage() {
                         },
                       ]
                     : []),
-                  ...(canReject && row.status === 'pending'
+                  ...(canReject && row.status === 'pending' && row.employeeId !== employeeId
                     ? [
                         {
                           id: 'reject',
@@ -276,7 +276,9 @@ export function LeaveRequestsPage() {
           if (!approveTarget) return
           setActionLoading(true)
           try {
-            await leaveService.approveLeaveRequest(approveTarget.id, user?.name ?? 'System')
+            await leaveService.approveLeaveRequest(approveTarget.id, user?.name ?? 'System', {
+              actorEmployeeId: employeeId ?? undefined,
+            })
             showSuccess('Leave request approved.')
             setApproveTarget(null)
             await load()
@@ -319,6 +321,7 @@ export function LeaveRequestsPage() {
                     rejectTarget.id,
                     rejectReason,
                     user?.name ?? 'System',
+                    { actorEmployeeId: employeeId ?? undefined },
                   )
                   showSuccess('Leave request rejected.')
                   setRejectTarget(null)

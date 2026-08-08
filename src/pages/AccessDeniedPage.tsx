@@ -1,9 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { ShieldAlert } from 'lucide-react'
 import { Button, Card, CardContent } from '@/components/ui'
+import { ROLES } from '@/constants/roles'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function AccessDeniedPage() {
   const navigate = useNavigate()
+  const { hasRole } = useAuth()
+  const home = hasRole(ROLES.EMPLOYEE) ? '/employee/dashboard' : '/dashboard'
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center p-4">
@@ -15,9 +19,9 @@ export function AccessDeniedPage() {
           <p className="font-display text-4xl font-semibold text-surface-900 dark:text-surface-50">403</p>
           <h1 className="mt-2 text-section-title">Access Denied</h1>
           <p className="mt-2 max-w-sm text-sm text-surface-500 dark:text-surface-400">
-            You don&apos;t have permission to access this page.
+            You do not have permission to access this page.
           </p>
-          <Button className="mt-6" onClick={() => navigate('/dashboard')}>
+          <Button className="mt-6" onClick={() => navigate(home)}>
             Back to Dashboard
           </Button>
         </CardContent>

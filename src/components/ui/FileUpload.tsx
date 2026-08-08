@@ -16,6 +16,8 @@ export interface FileUploadProps {
   accept?: string
   multiple?: boolean
   disabled?: boolean
+  /** Maximum file size in bytes. Reject oversized files before calling onFileSelect. */
+  maxSizeBytes?: number
   progress?: number | null
   value?: UploadedFileMeta | null
   onFileSelect?: (file: File | null) => void
@@ -36,6 +38,7 @@ export function FileUpload({
   accept,
   multiple = false,
   disabled = false,
+  maxSizeBytes,
   progress = null,
   value = null,
   onFileSelect,
@@ -47,6 +50,10 @@ export function FileUpload({
 
   const handleFiles = (files: FileList | null) => {
     const file = files?.[0] ?? null
+    if (file && maxSizeBytes != null && file.size > maxSizeBytes) {
+      onFileSelect?.(null)
+      return
+    }
     onFileSelect?.(file)
   }
 
