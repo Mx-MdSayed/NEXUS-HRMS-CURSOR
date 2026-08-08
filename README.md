@@ -17,6 +17,7 @@ Professional Basic-to-Mid-Level Human Resource Management System.
 - **Module 11** — Payslip & salary document management (complete)
 - **Module 12** — Employee Self-Service (ESS) portal (complete)
 - **Module 13** — Notifications & workflow management (complete)
+- **Module 14** — Reports & analytics (complete)
 
 ## Getting started
 

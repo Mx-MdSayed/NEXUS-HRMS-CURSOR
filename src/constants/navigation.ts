@@ -87,7 +87,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Reports',
     path: '/reports',
     icon: 'BarChart3',
-    module: 'Later module',
+    module: 'Module 14',
     requiredPermission: PERMISSIONS.REPORTS_VIEW,
   },
   {

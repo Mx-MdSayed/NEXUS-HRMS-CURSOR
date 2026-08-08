@@ -228,4 +228,21 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
+  .report-print-area {
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .report-print-area > * {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report-print-area table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10px !important;
+  }
 }

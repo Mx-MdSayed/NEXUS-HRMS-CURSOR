@@ -68,6 +68,19 @@ import {
   PayslipsPage,
 } from '@/features/payslip'
 import {
+  AttendanceReportsPage,
+  DepartmentReportsPage,
+  DesignationReportsPage,
+  EmployeeReportsPage,
+  LeaveReportsPage,
+  PayrollReportsPage,
+  PayslipReportsPage,
+  ReportsIndexPage,
+  ReportsOverviewPage,
+  SalaryReportsPage,
+  WorkforceReportsPage,
+} from '@/features/reports'
+import {
   NotificationDetailPage,
   NotificationSettingsPage,
   NotificationTemplateFormPage,
@@ -736,11 +749,87 @@ export function AppRoutes() {
           path="reports"
           element={
             <PermissionRoute permission={PERMISSIONS.REPORTS_VIEW}>
-              <PlaceholderPage
-                title="Reports"
-                moduleLabel="Later module"
-                description="HR analytics and exportable reports will be implemented in a later module."
-              />
+              <ReportsIndexPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/overview"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORTS_VIEW}>
+              <ReportsOverviewPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/employees"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_EMPLOYEE}>
+              <EmployeeReportsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/attendance"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_ATTENDANCE}>
+              <AttendanceReportsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/leave"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_LEAVE}>
+              <LeaveReportsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/salary"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_SALARY}>
+              <SalaryReportsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/payroll"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_PAYROLL}>
+              <PayrollReportsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/payslips"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_PAYSLIP}>
+              <PayslipReportsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/departments"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_DEPARTMENT}>
+              <DepartmentReportsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/designations"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_DEPARTMENT}>
+              <DesignationReportsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="reports/workforce"
+          element={
+            <PermissionRoute permission={PERMISSIONS.REPORT_WORKFORCE}>
+              <WorkforceReportsPage />
             </PermissionRoute>
           }
         />
