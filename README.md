@@ -2,16 +2,10 @@
 
 Professional Basic-to-Mid-Level Human Resource Management System.
 
-## Module 1 — Foundation & Architecture
+## Module status
 
-This repository currently includes the Module 1 foundation:
-
-- React 18+ / TypeScript / Vite
-- App shell with sidebar, header, and responsive layout
-- Light/dark theme with persistence
-- Reusable UI design system
-- Route architecture with placeholder pages
-- Dashboard shell with placeholder KPIs and charts
+- **Module 1** — Foundation & architecture (complete)
+- **Module 2** — Design system & reusable UI components (complete)
 
 ## Getting started
 
@@ -26,3 +20,11 @@ npm run dev
 - `npm run build` — typecheck and production build
 - `npm run preview` — preview production build
 - `npm run lint` — run oxlint
+
+## UI Preview
+
+Internal design system showcase (not in main navigation):
+
+```text
+/ui-preview
+```

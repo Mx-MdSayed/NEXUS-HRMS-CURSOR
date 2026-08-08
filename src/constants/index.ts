@@ -7,3 +7,4 @@ export {
   EMPLOYMENT_STATUS_LABELS,
   EMPLOYMENT_STATUSES,
 } from './roles'
+export { colorTokens, radiusTokens, shadowTokens, spacingScale } from './design'

@@ -4,6 +4,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { ProfilePage } from '@/pages/ProfilePage'
+import { UiPreviewPage } from '@/pages/UiPreviewPage'
 
 export function AppRoutes() {
   return (
@@ -12,6 +13,7 @@ export function AppRoutes() {
       <Route path="/" element={<AppLayout />}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="ui-preview" element={<UiPreviewPage />} />
         <Route
           path="employees"
           element={
@@ -117,8 +119,8 @@ export function AppRoutes() {
           element={
             <PlaceholderPage
               title="Settings"
-              moduleLabel="Module 2"
-              description="Company settings and preferences will be implemented in Module 2."
+              moduleLabel="Later module"
+              description="Company settings and preferences will be implemented in a later module. Module 2 delivers the shared design system."
             />
           }
         />
