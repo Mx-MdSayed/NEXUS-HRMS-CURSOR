@@ -412,4 +412,22 @@ export const employeeSalaryService = {
       .sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom))[0]
     return match ? structuredClone(match) : null
   },
+
+  /**
+   * All salary snapshots that overlap a payroll period (for mid-month revision proration).
+   */
+  async getSalariesOverlappingPeriod(
+    employeeId: string,
+    periodStart: string,
+    periodEnd: string,
+  ): Promise<EmployeeSalary[]> {
+    await delay(40)
+    return structuredClone(
+      salariesDb
+        .filter((item) => item.employeeId === employeeId)
+        .filter((item) => item.effectiveFrom <= periodEnd)
+        .filter((item) => !item.effectiveTo || item.effectiveTo >= periodStart)
+        .sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom)),
+    )
+  },
 }

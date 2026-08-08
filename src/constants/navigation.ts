@@ -65,7 +65,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Payroll',
     path: '/payroll',
     icon: 'Banknote',
-    module: 'Later module',
+    module: 'Module 10',
     requiredPermission: PERMISSIONS.PAYROLL_VIEW,
   },
   {
