@@ -110,6 +110,21 @@ import {
   EssSettingsPage,
 } from '@/features/ess'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
+import {
+  LoginActivityPage,
+  PermissionMatrixPage,
+  PermissionsPage,
+  RoleCreatePage,
+  RoleDetailPage,
+  RoleEditPage,
+  RoleListPage,
+  SecurityDashboardPage,
+  SessionsPage,
+  UserCreatePage,
+  UserDetailPage,
+  UserEditPage,
+  UserListPage,
+} from '@/features/access-control'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
@@ -915,11 +930,103 @@ export function AppRoutes() {
           path="users"
           element={
             <PermissionRoute permission={PERMISSIONS.USER_VIEW}>
-              <PlaceholderPage
-                title="Users"
-                moduleLabel="Later module"
-                description="User administration builds on Module 3 authentication and RBAC foundations."
-              />
+              <UserListPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="users/new"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.USER_CREATE, PERMISSIONS.USER_MANAGE]}>
+              <UserCreatePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="users/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.USER_VIEW}>
+              <UserDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="users/:id/edit"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.USER_EDIT, PERMISSIONS.USER_MANAGE]}>
+              <UserEditPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="roles"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ROLE_VIEW}>
+              <RoleListPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="roles/new"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.ROLE_CREATE, PERMISSIONS.ROLE_MANAGE]}>
+              <RoleCreatePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="roles/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ROLE_VIEW}>
+              <RoleDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="roles/:id/edit"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.ROLE_EDIT, PERMISSIONS.ROLE_MANAGE]}>
+              <RoleEditPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="permissions"
+          element={
+            <PermissionRoute permission={PERMISSIONS.PERMISSION_VIEW}>
+              <PermissionsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="permissions/matrix"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.PERMISSION_MANAGE, PERMISSIONS.ROLE_MANAGE]}>
+              <PermissionMatrixPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="security"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SECURITY_VIEW}>
+              <SecurityDashboardPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="security/login-activity"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SECURITY_VIEW}>
+              <LoginActivityPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="security/sessions"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SECURITY_VIEW}>
+              <SessionsPage />
             </PermissionRoute>
           }
         />

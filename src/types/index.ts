@@ -1,4 +1,4 @@
-export type RoleName = 'super_admin' | 'hr_admin' | 'employee'
+export type RoleName = 'super_admin' | 'hr_admin' | 'hr_manager' | 'manager' | 'employee'
 
 export type PermissionName =
   | 'dashboard.view'
@@ -9,6 +9,7 @@ export type PermissionName =
   | 'employee.edit'
   | 'employee.delete'
   | 'employee.manage'
+  | 'employee.export'
   | 'department.view'
   | 'department.create'
   | 'department.edit'
@@ -25,6 +26,7 @@ export type PermissionName =
   | 'attendance.manage'
   | 'attendance.correct'
   | 'attendance.approve'
+  | 'attendance.export'
   | 'leave.view'
   | 'leave.create'
   | 'leave.apply'
@@ -35,6 +37,7 @@ export type PermissionName =
   | 'leave.manage'
   | 'leave.type.manage'
   | 'leave.balance.manage'
+  | 'leave.export'
   | 'salary.view'
   | 'salary.create'
   | 'salary.edit'
@@ -43,6 +46,7 @@ export type PermissionName =
   | 'salary.assign'
   | 'salary.revise'
   | 'salary.component.manage'
+  | 'salary.export'
   | 'payroll.view'
   | 'payroll.create'
   | 'payroll.edit'
@@ -54,6 +58,8 @@ export type PermissionName =
   | 'payroll.manage'
   | 'payroll.settings.manage'
   | 'payroll.employee.view'
+  | 'payroll.finalize'
+  | 'payroll.export'
   | 'payslip.view'
   | 'payslip.generate'
   | 'payslip.print'
@@ -85,6 +91,17 @@ export type PermissionName =
   | 'user.create'
   | 'user.edit'
   | 'user.delete'
+  | 'user.manage'
+  | 'user.export'
+  | 'role.view'
+  | 'role.create'
+  | 'role.edit'
+  | 'role.delete'
+  | 'role.manage'
+  | 'permission.view'
+  | 'permission.manage'
+  | 'security.view'
+  | 'security.manage'
   | 'settings.view'
   | 'settings.manage'
   | 'ess.view'
@@ -96,7 +113,9 @@ export type EmploymentStatus =
   | 'terminated'
   | 'probation'
 
-export type UserStatus = 'active' | 'inactive' | 'invited' | 'locked'
+export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending' | 'invited' | 'locked'
+
+export type PermissionScope = 'all' | 'department' | 'team' | 'own' | 'assigned'
 
 export interface Permission {
   id: string
@@ -115,20 +134,28 @@ export interface Role {
 export interface User {
   id: string
   employeeId?: string
+  employeeRecordId?: string
   firstName: string
   lastName: string
   name: string
   email: string
+  username?: string
   role: RoleName
+  roleIds?: string[]
   avatarUrl?: string
+  profilePhoto?: string
   status: UserStatus
   employmentStatus: EmploymentStatus
   isActive: boolean
+  mustChangePassword?: boolean
+  suspendedReason?: string
   lastLoginAt?: string
   departmentId?: string
   designationId?: string
   createdAt: string
   updatedAt: string
+  deletedAt?: string
+  deletedBy?: string
 }
 
 export interface NavigationItem {

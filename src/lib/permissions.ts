@@ -2,9 +2,13 @@ import type { PermissionName, RoleName, User } from '@/types'
 import { getPermissionsForRole } from '@/constants/rbac'
 import { PERMISSIONS } from '@/constants/permissions'
 import { ROLES } from '@/constants/roles'
+import { getEffectivePermissions, getPermissionScope } from '@/features/access-control/services/roleService'
+import type { PermissionScope } from '@/types'
 
 export function getUserPermissions(user: User | null | undefined): PermissionName[] {
   if (!user) return []
+  const effective = getEffectivePermissions(user)
+  if (effective.length > 0) return effective
   return getPermissionsForRole(user.role)
 }
 
@@ -23,6 +27,7 @@ export function hasPermission(
   permission: PermissionName | PermissionName[],
 ): boolean {
   if (!user) return false
+  if (user.status && user.status !== 'active') return false
   const permissions = getUserPermissions(user)
   const required = Array.isArray(permission) ? permission : [permission]
   if (permissions.includes(PERMISSIONS.REPORT_ADMIN) && required.some(isReportPermission)) {
@@ -47,6 +52,13 @@ export function hasAllPermissions(
   return permissions.every((permission) => userPermissions.includes(permission))
 }
 
+export function hasPermissionScope(
+  user: User | null | undefined,
+  permission: PermissionName,
+): PermissionScope {
+  return getPermissionScope(user, permission)
+}
+
 export function isEmployee(user: User | null | undefined): boolean {
   return hasRole(user, ROLES.EMPLOYEE)
 }
@@ -54,3 +66,5 @@ export function isEmployee(user: User | null | undefined): boolean {
 export function isSuperAdmin(user: User | null | undefined): boolean {
   return hasRole(user, ROLES.SUPER_ADMIN)
 }
+
+export { getEffectivePermissions }

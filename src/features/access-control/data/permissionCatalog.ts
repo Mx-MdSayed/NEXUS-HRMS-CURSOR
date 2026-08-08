@@ -1,0 +1,148 @@
+import { PERMISSIONS } from '@/constants/permissions'
+import type { PermissionDefinition } from '../types'
+
+function def(
+  code: PermissionDefinition['code'],
+  name: string,
+  module: string,
+  action: string,
+  description: string,
+): PermissionDefinition {
+  return {
+    id: `perm_${code.replace(/\./g, '_')}`,
+    code,
+    name,
+    module,
+    category: module,
+    action,
+    description,
+    isSystemPermission: true,
+  }
+}
+
+export const PERMISSION_CATALOG: PermissionDefinition[] = [
+  def(PERMISSIONS.DASHBOARD_VIEW, 'View Dashboard', 'Dashboard', 'view', 'Access the main dashboard'),
+  def(PERMISSIONS.PROFILE_VIEW, 'View Profile', 'Profile', 'view', 'View own profile'),
+  def(PERMISSIONS.PROFILE_EDIT, 'Edit Profile', 'Profile', 'edit', 'Edit own profile'),
+
+  def(PERMISSIONS.EMPLOYEE_VIEW, 'View Employees', 'Employee', 'view', 'View employee records'),
+  def(PERMISSIONS.EMPLOYEE_CREATE, 'Create Employees', 'Employee', 'create', 'Create employee records'),
+  def(PERMISSIONS.EMPLOYEE_EDIT, 'Edit Employees', 'Employee', 'edit', 'Edit employee records'),
+  def(PERMISSIONS.EMPLOYEE_DELETE, 'Delete Employees', 'Employee', 'delete', 'Soft-delete employee records'),
+  def(PERMISSIONS.EMPLOYEE_MANAGE, 'Manage Employees', 'Employee', 'manage', 'Full employee management'),
+  def(PERMISSIONS.EMPLOYEE_EXPORT, 'Export Employees', 'Employee', 'export', 'Export employee lists'),
+
+  def(PERMISSIONS.DEPARTMENT_VIEW, 'View Departments', 'Department', 'view', 'View departments'),
+  def(PERMISSIONS.DEPARTMENT_CREATE, 'Create Departments', 'Department', 'create', 'Create departments'),
+  def(PERMISSIONS.DEPARTMENT_EDIT, 'Edit Departments', 'Department', 'edit', 'Edit departments'),
+  def(PERMISSIONS.DEPARTMENT_DELETE, 'Delete Departments', 'Department', 'delete', 'Delete departments'),
+  def(PERMISSIONS.DEPARTMENT_MANAGE, 'Manage Departments', 'Department', 'manage', 'Full department management'),
+
+  def(PERMISSIONS.DESIGNATION_VIEW, 'View Designations', 'Designation', 'view', 'View designations'),
+  def(PERMISSIONS.DESIGNATION_CREATE, 'Create Designations', 'Designation', 'create', 'Create designations'),
+  def(PERMISSIONS.DESIGNATION_EDIT, 'Edit Designations', 'Designation', 'edit', 'Edit designations'),
+  def(PERMISSIONS.DESIGNATION_DELETE, 'Delete Designations', 'Designation', 'delete', 'Delete designations'),
+  def(PERMISSIONS.DESIGNATION_MANAGE, 'Manage Designations', 'Designation', 'manage', 'Full designation management'),
+
+  def(PERMISSIONS.ATTENDANCE_VIEW, 'View Attendance', 'Attendance', 'view', 'View attendance'),
+  def(PERMISSIONS.ATTENDANCE_CREATE, 'Create Attendance', 'Attendance', 'create', 'Create attendance records'),
+  def(PERMISSIONS.ATTENDANCE_EDIT, 'Edit Attendance', 'Attendance', 'edit', 'Edit attendance'),
+  def(PERMISSIONS.ATTENDANCE_MANAGE, 'Manage Attendance', 'Attendance', 'manage', 'Manage attendance'),
+  def(PERMISSIONS.ATTENDANCE_CORRECT, 'Correct Attendance', 'Attendance', 'approve', 'Submit attendance corrections'),
+  def(PERMISSIONS.ATTENDANCE_APPROVE, 'Approve Attendance', 'Attendance', 'approve', 'Approve attendance corrections'),
+  def(PERMISSIONS.ATTENDANCE_EXPORT, 'Export Attendance', 'Attendance', 'export', 'Export attendance'),
+
+  def(PERMISSIONS.LEAVE_VIEW, 'View Leave', 'Leave', 'view', 'View leave'),
+  def(PERMISSIONS.LEAVE_CREATE, 'Create Leave', 'Leave', 'create', 'Create leave requests'),
+  def(PERMISSIONS.LEAVE_APPLY, 'Apply Leave', 'Leave', 'create', 'Apply for leave'),
+  def(PERMISSIONS.LEAVE_EDIT, 'Edit Leave', 'Leave', 'edit', 'Edit leave requests'),
+  def(PERMISSIONS.LEAVE_CANCEL, 'Cancel Leave', 'Leave', 'edit', 'Cancel leave requests'),
+  def(PERMISSIONS.LEAVE_APPROVE, 'Approve Leave', 'Leave', 'approve', 'Approve leave requests'),
+  def(PERMISSIONS.LEAVE_REJECT, 'Reject Leave', 'Leave', 'reject', 'Reject leave requests'),
+  def(PERMISSIONS.LEAVE_MANAGE, 'Manage Leave', 'Leave', 'manage', 'Manage leave module'),
+  def(PERMISSIONS.LEAVE_TYPE_MANAGE, 'Manage Leave Types', 'Leave', 'manage', 'Manage leave types'),
+  def(PERMISSIONS.LEAVE_BALANCE_MANAGE, 'Manage Leave Balances', 'Leave', 'manage', 'Manage leave balances'),
+  def(PERMISSIONS.LEAVE_EXPORT, 'Export Leave', 'Leave', 'export', 'Export leave data'),
+
+  def(PERMISSIONS.SALARY_VIEW, 'View Salary', 'Salary', 'view', 'View salary structures and assignments'),
+  def(PERMISSIONS.SALARY_CREATE, 'Create Salary', 'Salary', 'create', 'Create salary structures'),
+  def(PERMISSIONS.SALARY_EDIT, 'Edit Salary', 'Salary', 'edit', 'Edit salary data'),
+  def(PERMISSIONS.SALARY_DELETE, 'Delete Salary', 'Salary', 'delete', 'Delete salary structures'),
+  def(PERMISSIONS.SALARY_MANAGE, 'Manage Salary', 'Salary', 'manage', 'Full salary management'),
+  def(PERMISSIONS.SALARY_ASSIGN, 'Assign Salary', 'Salary', 'manage', 'Assign salary to employees'),
+  def(PERMISSIONS.SALARY_REVISE, 'Revise Salary', 'Salary', 'manage', 'Revise employee salary'),
+  def(PERMISSIONS.SALARY_COMPONENT_MANAGE, 'Manage Salary Components', 'Salary', 'manage', 'Manage components'),
+  def(PERMISSIONS.SALARY_EXPORT, 'Export Salary', 'Salary', 'export', 'Export salary data'),
+
+  def(PERMISSIONS.PAYROLL_VIEW, 'View Payroll', 'Payroll', 'view', 'View payroll runs'),
+  def(PERMISSIONS.PAYROLL_CREATE, 'Create Payroll', 'Payroll', 'create', 'Create payroll runs'),
+  def(PERMISSIONS.PAYROLL_EDIT, 'Edit Payroll', 'Payroll', 'edit', 'Edit payroll runs'),
+  def(PERMISSIONS.PAYROLL_CALCULATE, 'Calculate Payroll', 'Payroll', 'manage', 'Calculate payroll'),
+  def(PERMISSIONS.PAYROLL_PROCESS, 'Process Payroll', 'Payroll', 'manage', 'Process payroll'),
+  def(PERMISSIONS.PAYROLL_APPROVE, 'Approve Payroll', 'Payroll', 'approve', 'Approve payroll'),
+  def(PERMISSIONS.PAYROLL_REJECT, 'Reject Payroll', 'Payroll', 'reject', 'Reject payroll'),
+  def(PERMISSIONS.PAYROLL_DELETE, 'Delete Payroll', 'Payroll', 'delete', 'Delete draft payroll'),
+  def(PERMISSIONS.PAYROLL_MANAGE, 'Manage Payroll', 'Payroll', 'manage', 'Full payroll management'),
+  def(PERMISSIONS.PAYROLL_SETTINGS_MANAGE, 'Payroll Settings', 'Payroll', 'manage', 'Manage payroll settings'),
+  def(PERMISSIONS.PAYROLL_EMPLOYEE_VIEW, 'View Employee Payroll', 'Payroll', 'view', 'View employee payroll rows'),
+  def(PERMISSIONS.PAYROLL_FINALIZE, 'Finalize Payroll', 'Payroll', 'manage', 'Finalize payroll runs'),
+  def(PERMISSIONS.PAYROLL_EXPORT, 'Export Payroll', 'Payroll', 'export', 'Export payroll data'),
+
+  def(PERMISSIONS.PAYSLIP_VIEW, 'View Payslips', 'Payslip', 'view', 'View payslips'),
+  def(PERMISSIONS.PAYSLIP_GENERATE, 'Generate Payslips', 'Payslip', 'create', 'Generate payslips'),
+  def(PERMISSIONS.PAYSLIP_PRINT, 'Print Payslips', 'Payslip', 'print', 'Print payslips'),
+  def(PERMISSIONS.PAYSLIP_DOWNLOAD, 'Download Payslips', 'Payslip', 'export', 'Download payslips'),
+  def(PERMISSIONS.PAYSLIP_MANAGE, 'Manage Payslips', 'Payslip', 'manage', 'Manage payslips'),
+
+  def(PERMISSIONS.REPORTS_VIEW, 'View Reports', 'Reports', 'view', 'Access reports module'),
+  def(PERMISSIONS.REPORT_EMPLOYEE, 'Employee Reports', 'Reports', 'view', 'View employee reports'),
+  def(PERMISSIONS.REPORT_ATTENDANCE, 'Attendance Reports', 'Reports', 'view', 'View attendance reports'),
+  def(PERMISSIONS.REPORT_LEAVE, 'Leave Reports', 'Reports', 'view', 'View leave reports'),
+  def(PERMISSIONS.REPORT_SALARY, 'Salary Reports', 'Reports', 'view', 'View salary reports'),
+  def(PERMISSIONS.REPORT_PAYROLL, 'Payroll Reports', 'Reports', 'view', 'View payroll reports'),
+  def(PERMISSIONS.REPORT_PAYSLIP, 'Payslip Reports', 'Reports', 'view', 'View payslip reports'),
+  def(PERMISSIONS.REPORT_DEPARTMENT, 'Department Reports', 'Reports', 'view', 'View department reports'),
+  def(PERMISSIONS.REPORT_WORKFORCE, 'Workforce Reports', 'Reports', 'view', 'View workforce analytics'),
+  def(PERMISSIONS.REPORT_EXPORT, 'Export Reports', 'Reports', 'export', 'Export report data'),
+  def(PERMISSIONS.REPORT_ADMIN, 'Report Admin', 'Reports', 'manage', 'Full report administration'),
+
+  def(PERMISSIONS.NOTIFICATION_VIEW, 'View Notifications', 'Notifications', 'view', 'View notifications'),
+  def(PERMISSIONS.NOTIFICATION_MANAGE, 'Manage Notifications', 'Notifications', 'manage', 'Manage notifications'),
+  def(PERMISSIONS.NOTIFICATION_TEMPLATE_MANAGE, 'Manage Notification Templates', 'Notifications', 'manage', 'Manage templates'),
+  def(PERMISSIONS.NOTIFICATION_SETTINGS_MANAGE, 'Notification Settings', 'Notifications', 'manage', 'Manage notification settings'),
+
+  def(PERMISSIONS.WORKFLOW_VIEW, 'View Workflows', 'Workflow', 'view', 'View workflow requests'),
+  def(PERMISSIONS.WORKFLOW_CREATE, 'Create Workflows', 'Workflow', 'create', 'Create workflow requests'),
+  def(PERMISSIONS.WORKFLOW_APPROVE, 'Approve Workflows', 'Workflow', 'approve', 'Approve workflow requests'),
+  def(PERMISSIONS.WORKFLOW_REJECT, 'Reject Workflows', 'Workflow', 'reject', 'Reject workflow requests'),
+  def(PERMISSIONS.WORKFLOW_MANAGE, 'Manage Workflows', 'Workflow', 'manage', 'Manage workflows'),
+  def(PERMISSIONS.WORKFLOW_ADMIN, 'Workflow Admin', 'Workflow', 'manage', 'Administer workflows'),
+
+  def(PERMISSIONS.USER_VIEW, 'View Users', 'Users', 'view', 'View user accounts'),
+  def(PERMISSIONS.USER_CREATE, 'Create Users', 'Users', 'create', 'Create user accounts'),
+  def(PERMISSIONS.USER_EDIT, 'Edit Users', 'Users', 'edit', 'Edit user accounts'),
+  def(PERMISSIONS.USER_DELETE, 'Delete Users', 'Users', 'delete', 'Soft-delete user accounts'),
+  def(PERMISSIONS.USER_MANAGE, 'Manage Users', 'Users', 'manage', 'Full user management'),
+  def(PERMISSIONS.USER_EXPORT, 'Export Users', 'Users', 'export', 'Export user lists'),
+
+  def(PERMISSIONS.ROLE_VIEW, 'View Roles', 'Roles', 'view', 'View roles'),
+  def(PERMISSIONS.ROLE_CREATE, 'Create Roles', 'Roles', 'create', 'Create custom roles'),
+  def(PERMISSIONS.ROLE_EDIT, 'Edit Roles', 'Roles', 'edit', 'Edit roles and permissions'),
+  def(PERMISSIONS.ROLE_DELETE, 'Delete Roles', 'Roles', 'delete', 'Delete custom roles'),
+  def(PERMISSIONS.ROLE_MANAGE, 'Manage Roles', 'Roles', 'manage', 'Full role management'),
+
+  def(PERMISSIONS.PERMISSION_VIEW, 'View Permissions', 'Permissions', 'view', 'View permission catalog'),
+  def(PERMISSIONS.PERMISSION_MANAGE, 'Manage Permissions', 'Permissions', 'manage', 'Manage permission assignments'),
+
+  def(PERMISSIONS.SECURITY_VIEW, 'View Security', 'Security', 'view', 'View security dashboard'),
+  def(PERMISSIONS.SECURITY_MANAGE, 'Manage Security', 'Security', 'manage', 'Manage security settings'),
+
+  def(PERMISSIONS.SETTINGS_VIEW, 'View Settings', 'Settings', 'view', 'View system settings'),
+  def(PERMISSIONS.SETTINGS_MANAGE, 'Manage Settings', 'Settings', 'manage', 'Manage system settings'),
+
+  def(PERMISSIONS.ESS_VIEW, 'Employee Self-Service', 'ESS', 'view', 'Access employee self-service portal'),
+]
+
+export const PERMISSION_MODULES = Array.from(
+  new Set(PERMISSION_CATALOG.map((item) => item.module)),
+).sort((a, b) => a.localeCompare(b))

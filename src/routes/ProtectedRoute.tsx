@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { PageLoader } from '@/components/ui'
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
   const location = useLocation()
 
   if (isLoading) {
@@ -14,6 +14,14 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   if (!isAuthenticated) {
     const redirect = `${location.pathname}${location.search}`
     return <Navigate to={`/login?redirect=${encodeURIComponent(redirect)}`} replace />
+  }
+
+  if (
+    user?.mustChangePassword &&
+    location.pathname !== '/change-password' &&
+    location.pathname !== '/logout'
+  ) {
+    return <Navigate to="/change-password" replace />
   }
 
   return children

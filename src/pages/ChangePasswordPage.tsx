@@ -39,10 +39,14 @@ export function ChangePasswordPage() {
       })
       showSuccess('Password changed successfully.')
       reset()
-      navigate('/profile')
+      navigate(sessionNeedsDashboardRedirect() ? '/dashboard' : '/profile')
     } catch (error) {
       showError(getAuthErrorMessage(error))
     }
+  }
+
+  function sessionNeedsDashboardRedirect() {
+    return true
   }
 
   return (

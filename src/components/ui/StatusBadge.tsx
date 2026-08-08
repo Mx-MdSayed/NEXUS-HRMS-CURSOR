@@ -4,6 +4,7 @@ export type StatusTone =
   | 'active'
   | 'inactive'
   | 'pending'
+  | 'suspended'
   | 'approved'
   | 'rejected'
   | 'paid'
@@ -26,6 +27,7 @@ const statusConfig: Record<StatusTone, { label: string; variant: BadgeVariant }>
   active: { label: 'Active', variant: 'success' },
   inactive: { label: 'Inactive', variant: 'neutral' },
   pending: { label: 'Pending', variant: 'warning' },
+  suspended: { label: 'Suspended', variant: 'danger' },
   approved: { label: 'Approved', variant: 'success' },
   rejected: { label: 'Rejected', variant: 'danger' },
   paid: { label: 'Paid', variant: 'success' },

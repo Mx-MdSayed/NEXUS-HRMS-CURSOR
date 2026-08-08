@@ -1,7 +1,14 @@
+/**
+ * Temporary development authentication adapter.
+ * Swap this implementation for a real API-backed service without changing UI.
+ */
 import {
   AUTH_SESSION_TTL_MS,
   AUTH_SESSION_TTL_REMEMBER_MS,
 } from '@/constants/app'
+import { AccessControlError } from '@/features/access-control/services/errors'
+import { securityService } from '@/features/access-control/services/securityService'
+import { userManagementService } from '@/features/access-control/services/userManagementService'
 import type { AuthSession, LoginCredentials, LoginResult, User } from '@/types'
 import {
   AuthServiceError,
@@ -9,7 +16,6 @@ import {
   type ChangePasswordInput,
   type ResetPasswordInput,
 } from './authService'
-import { DEV_AUTH_ACCOUNTS, toPublicUser } from './devAuthConfig'
 import { clearSession, getSession, isSessionExpired, setSession } from './session'
 
 function delay(ms = 450): Promise<void> {
@@ -32,28 +38,31 @@ function buildSession(user: User, rememberMe: boolean): AuthSession {
   }
 }
 
-/**
- * Temporary development authentication adapter.
- * Swap this implementation for a real API-backed service without changing UI.
- */
 export const mockAuthService: AuthService = {
   async login(credentials: LoginCredentials): Promise<LoginResult> {
     await delay()
 
     const email = credentials.email.trim().toLowerCase()
-    const account = DEV_AUTH_ACCOUNTS.find((item) => item.email === email)
-
-    if (!account || account.password !== credentials.password) {
-      throw new AuthServiceError(
-        'INVALID_CREDENTIALS',
-        'Invalid email or password. Please try again.',
-      )
+    try {
+      const user = await userManagementService.authenticate(email, credentials.password)
+      if (!user) {
+        await securityService.recordLogin('unknown', 'Unknown', email, false)
+        throw new AuthServiceError(
+          'INVALID_CREDENTIALS',
+          'Invalid email or password. Please try again.',
+        )
+      }
+      await securityService.recordLogin(user.id, user.name, user.email, true)
+      const session = buildSession(user, Boolean(credentials.rememberMe))
+      setSession(session)
+      return { session }
+    } catch (error) {
+      if (error instanceof AccessControlError) {
+        await securityService.recordLogin('unknown', 'Unknown', email, false)
+        throw new AuthServiceError('UNAUTHORIZED', error.message)
+      }
+      throw error
     }
-
-    const user = toPublicUser(account)
-    const session = buildSession(user, Boolean(credentials.rememberMe))
-    setSession(session)
-    return { session }
   },
 
   async logout(): Promise<void> {
@@ -68,7 +77,8 @@ export const mockAuthService: AuthService = {
       clearSession()
       return null
     }
-    return session.user
+    const managed = userManagementService.findByEmailSync(session.user.email)
+    return managed ?? session.user
   },
 
   async refreshSession(): Promise<LoginResult | null> {
@@ -78,20 +88,19 @@ export const mockAuthService: AuthService = {
       clearSession()
       return null
     }
-
-    const next = buildSession(current.user, current.rememberMe)
+    const managed = userManagementService.findByEmailSync(current.user.email)
+    const user = managed ?? current.user
+    const next = buildSession(user, current.rememberMe)
     setSession(next)
     return { session: next }
   },
 
   async requestPasswordReset(_email: string): Promise<void> {
     await delay()
-    // Intentionally no-op / no email enumeration.
   },
 
   async resetPassword(_input: ResetPasswordInput): Promise<void> {
     await delay()
-    // Mock success for UI flow. Backend integration will replace this.
   },
 
   async changePassword(input: ChangePasswordInput): Promise<void> {
@@ -102,11 +111,8 @@ export const mockAuthService: AuthService = {
       throw new AuthServiceError('SESSION_EXPIRED', 'Your session has expired. Please sign in again.')
     }
 
-    const account = DEV_AUTH_ACCOUNTS.find(
-      (item) => item.email === session.user.email.toLowerCase(),
-    )
-
-    if (!account || account.password !== input.currentPassword) {
+    const internal = userManagementService.findInternalByEmail(session.user.email)
+    if (!internal || internal.password !== input.currentPassword) {
       throw new AuthServiceError('UNAUTHORIZED', 'Current password is incorrect.')
     }
 
@@ -117,7 +123,11 @@ export const mockAuthService: AuthService = {
       )
     }
 
-    // Development-only in-memory update for the mock adapter.
-    account.password = input.newPassword
+    internal.password = input.newPassword
+    userManagementService.markPasswordChanged(internal.id)
+    const refreshed = userManagementService.findByEmailSync(session.user.email)
+    if (refreshed) {
+      setSession(buildSession(refreshed, session.rememberMe))
+    }
   },
 }
