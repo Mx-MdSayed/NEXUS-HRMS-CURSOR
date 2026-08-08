@@ -12,6 +12,7 @@ import {
 } from '@/components/ui'
 import { PERMISSIONS } from '@/constants/permissions'
 import { useAuth } from '@/contexts/AuthContext'
+import { attendanceService } from '@/features/attendance/services/attendanceService'
 import { formatSalaryAmount } from '../utils/money'
 import { employeeSalaryService } from '../services/employeeSalaryService'
 import type { SalaryOverviewStats } from '../types'
@@ -39,9 +40,6 @@ export function SalaryIndexPage() {
           const overview = await employeeSalaryService.getOverviewStats()
           if (!cancelled) setStats(overview)
         } else {
-          const { attendanceService } = await import(
-            '@/features/attendance/services/attendanceService'
-          )
           const linked = await attendanceService.resolveLinkedEmployeeId(user ?? undefined)
           if (!cancelled) setOwnEmployeeId(linked)
         }
