@@ -2,6 +2,8 @@ import type { AdminDashboardData, EmployeeDashboardData } from '../types'
 import { mockAdminDashboard } from '../data/mockAdminDashboard'
 import { mockEmployeeDashboard } from '../data/mockEmployeeDashboard'
 import { employeeService } from '@/features/employees'
+import { departmentService } from '@/features/organization/services/departmentService'
+import { listActiveDepartmentOptions } from '@/features/organization/data/orgDb'
 
 function delay(ms = 500): Promise<void> {
   return new Promise((resolve) => {
@@ -16,7 +18,7 @@ export interface DashboardService {
 
 /**
  * Dashboard data adapter.
- * Recent employees prefer employeeService when available (Module 5+).
+ * Recent employees and department KPI prefer live services when available.
  */
 export const dashboardService: DashboardService = {
   async getAdminDashboard() {
@@ -43,6 +45,35 @@ export const dashboardService: DashboardService = {
     } catch {
       // Keep mock recent employees if employee service is unavailable.
     }
+
+    try {
+      const activeDepartments = listActiveDepartmentOptions()
+      const departmentsKpi = data.kpis.find((item) => item.id === 'departments')
+      if (departmentsKpi) {
+        departmentsKpi.value = activeDepartments.length
+        departmentsKpi.subtitle = 'Active departments'
+      }
+
+      const distribution = await departmentService.getDepartments({ status: 'active' }, 1, 50)
+      if (distribution.data.length > 0) {
+        const totalEmployees = distribution.data.reduce(
+          (sum, department) => sum + department.employeeCount,
+          0,
+        )
+        data.departmentDistribution = distribution.data.map((department) => ({
+          id: department.id,
+          name: department.name,
+          employeeCount: department.employeeCount,
+          percentage:
+            totalEmployees > 0
+              ? Math.round((department.employeeCount / totalEmployees) * 100)
+              : 0,
+        }))
+      }
+    } catch {
+      // Keep mock department metrics if organization services are unavailable.
+    }
+
     return data
   },
 

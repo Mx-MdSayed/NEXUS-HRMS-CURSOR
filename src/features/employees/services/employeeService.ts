@@ -1,12 +1,18 @@
 import { DEFAULT_PAGE_SIZE } from '@/constants/app'
 import { ROLES } from '@/constants/roles'
 import { DEV_AUTH_ACCOUNTS } from '@/services/auth/devAuthConfig'
+import {
+  getDepartmentByIdSync,
+  getDepartmentNameById,
+  getDesignationByIdSync,
+  getDesignationNameById,
+  listActiveDepartmentOptions,
+  listActiveDesignationOptions,
+} from '@/features/organization/data/orgDb'
+import type { DepartmentOption, DesignationOption } from '@/features/organization/types'
 import { buildFullName } from '../utils/format'
 import { initialEmployees } from '../data/mockEmployees'
-import { mockDepartments, mockDesignations } from '../data/mockOrg'
 import type {
-  DepartmentOption,
-  DesignationOption,
   Employee,
   EmployeeDocument,
   EmployeeFormValues,
@@ -58,11 +64,11 @@ function assertCanManageTarget(employee: Employee, actorRole?: string) {
 }
 
 function getDepartmentName(departmentId: string): string {
-  return mockDepartments.find((item) => item.id === departmentId)?.name ?? '—'
+  return getDepartmentNameById(departmentId)
 }
 
 function getDesignationName(designationId: string): string {
-  return mockDesignations.find((item) => item.id === designationId)?.name ?? '—'
+  return getDesignationNameById(designationId)
 }
 
 function toListItem(employee: Employee): EmployeeListItem {
@@ -209,6 +215,36 @@ function validateUniqueness(values: EmployeeFormValues, excludeId?: string): voi
   if (values.reportingManagerId && values.reportingManagerId === excludeId) {
     throw new EmployeeServiceError('VALIDATION', 'An employee cannot be their own reporting manager.')
   }
+
+  const department = getDepartmentByIdSync(values.departmentId)
+  if (!department || department.status !== 'active') {
+    // Allow keeping an existing inactive department assignment during edit.
+    const existing = excludeId
+      ? employeesDb.find((item) => item.id === excludeId && !item.isDeleted)
+      : undefined
+    if (!existing || existing.departmentId !== values.departmentId || !department) {
+      throw new EmployeeServiceError('VALIDATION', 'Select a valid active department.')
+    }
+  }
+
+  const designation = getDesignationByIdSync(values.designationId)
+  if (!designation) {
+    throw new EmployeeServiceError('VALIDATION', 'Select a valid designation.')
+  }
+  if (designation.departmentId !== values.departmentId) {
+    throw new EmployeeServiceError(
+      'VALIDATION',
+      'Selected designation does not belong to the selected department.',
+    )
+  }
+  if (designation.status !== 'active') {
+    const existing = excludeId
+      ? employeesDb.find((item) => item.id === excludeId && !item.isDeleted)
+      : undefined
+    if (!existing || existing.designationId !== values.designationId) {
+      throw new EmployeeServiceError('VALIDATION', 'Select a valid active designation.')
+    }
+  }
 }
 
 function pushActivity(employee: Employee, action: string, description: string, actorName: string) {
@@ -227,16 +263,12 @@ function pushActivity(employee: Employee, action: string, description: string, a
 export const employeeService = {
   async getDepartments(): Promise<DepartmentOption[]> {
     await delay(120)
-    return mockDepartments.filter((item) => item.isActive)
+    return listActiveDepartmentOptions()
   },
 
   async getDesignations(departmentId?: string): Promise<DesignationOption[]> {
     await delay(120)
-    return mockDesignations.filter((item) => {
-      if (!item.isActive) return false
-      if (!departmentId) return true
-      return !item.departmentId || item.departmentId === departmentId
-    })
+    return listActiveDesignationOptions(departmentId)
   },
 
   async getEmployees(query: EmployeeListQuery = {}): Promise<PaginatedEmployees> {

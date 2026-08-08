@@ -25,6 +25,10 @@ import type {
   EmployeeFormValues,
   EmployeeListItem,
 } from '../types'
+import {
+  getDepartmentByIdSync,
+  getDesignationByIdSync,
+} from '@/features/organization/data/orgDb'
 
 const defaultValues: EmployeeFormValues = {
   employeeCode: '',
@@ -111,21 +115,62 @@ export function EmployeeForm({
   }, [initialValues, reset])
 
   useEffect(() => {
-    void employeeService.getDepartments().then(setDepartments)
+    void employeeService.getDepartments().then((items) => {
+      const currentId = initialValues?.departmentId
+      if (currentId && !items.some((item) => item.id === currentId)) {
+        const current = getDepartmentByIdSync(currentId)
+        if (current) {
+          items = [
+            ...items,
+            {
+              id: current.id,
+              name: `${current.name} (inactive)`,
+              code: current.code,
+              isActive: false,
+            },
+          ]
+        }
+      }
+      setDepartments(items)
+    })
     void employeeService
       .getEmployees({ page: 1, pageSize: 100, sortBy: 'fullName' })
       .then((result) =>
         setManagers(result.data.filter((item) => item.id !== currentEmployeeId)),
       )
-  }, [currentEmployeeId])
+  }, [currentEmployeeId, initialValues?.departmentId])
 
   useEffect(() => {
     void employeeService.getDesignations(departmentId || undefined).then((items) => {
-      setDesignations(items)
       const currentDesignation = watch('designationId')
-      if (currentDesignation && !items.some((item) => item.id === currentDesignation)) {
+      if (
+        currentDesignation &&
+        departmentId &&
+        !items.some((item) => item.id === currentDesignation)
+      ) {
+        const current = getDesignationByIdSync(currentDesignation)
+        if (current && current.departmentId === departmentId) {
+          items = [
+            ...items,
+            {
+              id: current.id,
+              name: `${current.name} (inactive)`,
+              code: current.code,
+              departmentId: current.departmentId,
+              isActive: false,
+            },
+          ]
+        } else if (currentDesignation) {
+          setValue('designationId', '')
+        }
+      } else if (
+        currentDesignation &&
+        items.length > 0 &&
+        !items.some((item) => item.id === currentDesignation)
+      ) {
         setValue('designationId', '')
       }
+      setDesignations(items)
     })
   }, [departmentId, setValue, watch])
 

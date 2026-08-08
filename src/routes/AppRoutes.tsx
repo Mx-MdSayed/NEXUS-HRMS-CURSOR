@@ -8,6 +8,16 @@ import {
   EmployeeListPage,
   EmployeeProfilePage,
 } from '@/features/employees'
+import {
+  DepartmentCreatePage,
+  DepartmentDetailPage,
+  DepartmentEditPage,
+  DepartmentListPage,
+  DesignationCreatePage,
+  DesignationDetailPage,
+  DesignationEditPage,
+  DesignationListPage,
+} from '@/features/organization'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -103,11 +113,31 @@ export function AppRoutes() {
           path="departments"
           element={
             <PermissionRoute permission={PERMISSIONS.DEPARTMENT_VIEW}>
-              <PlaceholderPage
-                title="Departments"
-                moduleLabel="Module 6"
-                description="Department structure and org hierarchy management will arrive with Module 6."
-              />
+              <DepartmentListPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="departments/new"
+          element={
+            <PermissionRoute permission={PERMISSIONS.DEPARTMENT_CREATE}>
+              <DepartmentCreatePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="departments/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.DEPARTMENT_VIEW}>
+              <DepartmentDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="departments/:id/edit"
+          element={
+            <PermissionRoute permission={PERMISSIONS.DEPARTMENT_EDIT}>
+              <DepartmentEditPage />
             </PermissionRoute>
           }
         />
@@ -115,11 +145,31 @@ export function AppRoutes() {
           path="designations"
           element={
             <PermissionRoute permission={PERMISSIONS.DESIGNATION_VIEW}>
-              <PlaceholderPage
-                title="Designations"
-                moduleLabel="Module 6"
-                description="Job titles and designation management will arrive with Module 6."
-              />
+              <DesignationListPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="designations/new"
+          element={
+            <PermissionRoute permission={PERMISSIONS.DESIGNATION_CREATE}>
+              <DesignationCreatePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="designations/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.DESIGNATION_VIEW}>
+              <DesignationDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="designations/:id/edit"
+          element={
+            <PermissionRoute permission={PERMISSIONS.DESIGNATION_EDIT}>
+              <DesignationEditPage />
             </PermissionRoute>
           }
         />
@@ -129,8 +179,8 @@ export function AppRoutes() {
             <PermissionRoute permission={PERMISSIONS.ATTENDANCE_VIEW}>
               <PlaceholderPage
                 title="Attendance"
-                moduleLabel="Module 6"
-                description="Attendance tracking, check-in/out, and timesheets will be implemented in Module 6."
+                moduleLabel="Module 7"
+                description="Attendance tracking, check-in/out, and timesheets will be implemented in a later module."
               />
             </PermissionRoute>
           }
@@ -189,8 +239,8 @@ export function AppRoutes() {
             <PermissionRoute permission={PERMISSIONS.NOTIFICATION_VIEW}>
               <PlaceholderPage
                 title="Notifications"
-                moduleLabel="Module 4"
-                description="In-app notifications and alert preferences will be implemented in Module 4."
+                moduleLabel="Later module"
+                description="In-app notifications and alert preferences will be implemented later."
               />
             </PermissionRoute>
           }

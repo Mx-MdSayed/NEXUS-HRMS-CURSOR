@@ -1,4 +1,7 @@
 import type { EmploymentStatus } from '@/types'
+import type { DepartmentOption, DesignationOption } from '@/features/organization/types'
+
+export type { DepartmentOption, DesignationOption }
 
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern' | 'temporary'
 export type Gender = 'male' | 'female' | 'other' | 'prefer_not_to_say'
@@ -13,20 +16,6 @@ export type DocumentCategory =
   | 'joining_letter'
   | 'other'
 export type DocumentStatus = 'uploaded' | 'verified' | 'rejected'
-
-export interface DepartmentOption {
-  id: string
-  name: string
-  code: string
-  isActive: boolean
-}
-
-export interface DesignationOption {
-  id: string
-  name: string
-  departmentId?: string
-  isActive: boolean
-}
 
 export interface EmployeeAddress {
   line1: string
