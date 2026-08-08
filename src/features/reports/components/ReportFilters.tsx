@@ -117,7 +117,24 @@ export function ReportFilters({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-surface-500 dark:text-surface-400">{activeSummary}</p>
             <div className="flex gap-2">
-              <Button variant="ghost" leftIcon={<X className="h-4 w-4" />} onClick={onReset}>
+              <Button
+                type="button"
+                variant="ghost"
+                leftIcon={<X className="h-4 w-4" />}
+                onClick={() => {
+                  reset({
+                    search: '',
+                    departmentId: '',
+                    designationId: '',
+                    status: '',
+                    currency: '',
+                    preset: 'this_month',
+                    startDate: '',
+                    endDate: '',
+                  })
+                  onReset()
+                }}
+              >
                 Clear All
               </Button>
               <Button type="submit" leftIcon={<Filter className="h-4 w-4" />}>

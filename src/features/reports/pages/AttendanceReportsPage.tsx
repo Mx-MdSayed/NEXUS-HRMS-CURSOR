@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { AlertTriangle, Clock3, Percent, Users } from 'lucide-react'
 import { ErrorState, PageLoader } from '@/components/ui'
-import { useAuth } from '@/contexts/AuthContext'
 import {
   ReportBarChart,
   ReportFilters,
@@ -10,42 +9,20 @@ import {
   ReportPageShell,
   ReportTable,
 } from '../components'
+import { useReportQuery } from '../hooks/useReportQuery'
 import { reportService } from '../services/reportService'
-import type {
-  AttendanceEmployeeRow,
-  AttendanceReport,
-  ReportFilters as ReportFilterValues,
-} from '../types'
-import { getReportErrorMessage } from '../utils/errors'
+import type { AttendanceEmployeeRow, ReportFilters as ReportFilterValues } from '../types'
 
 const defaultFilters: ReportFilterValues = { preset: 'this_month' }
 
 export function AttendanceReportsPage() {
-  const { hasPermission } = useAuth()
   const [filters, setFilters] = useState<ReportFilterValues>(defaultFilters)
-  const [report, setReport] = useState<AttendanceReport | null>(null)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const data = await reportService.getAttendanceReport(filters, { permissions: [], hasPermission })
-        if (!cancelled) setReport(data)
-      } catch (err) {
-        if (!cancelled) setError(getReportErrorMessage(err))
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [filters, hasPermission])
+  const loader = useCallback(
+    (nextFilters: ReportFilterValues, auth: Parameters<typeof reportService.getAttendanceReport>[1]) =>
+      reportService.getAttendanceReport(nextFilters, auth),
+    [],
+  )
+  const { data: report, error, isLoading } = useReportQuery(filters, loader)
 
   if (isLoading && !report) return <PageLoader label="Loading attendance report" />
   if (error || !report) return <ErrorState title="Unable to load attendance report" message={error} />
@@ -88,7 +65,7 @@ export function AttendanceReportsPage() {
       </div>
       {report.lateEmployees.length > 0 ? (
         <ReportTable<AttendanceEmployeeRow>
-          title="Late arrivals"
+          title="Attendance exceptions — late arrivals"
           rows={report.lateEmployees}
           pageSize={5}
           columns={[
@@ -101,7 +78,7 @@ export function AttendanceReportsPage() {
       ) : null}
       {report.absentEmployees.length > 0 ? (
         <ReportTable<AttendanceEmployeeRow>
-          title="Absence watchlist"
+          title="Attendance exceptions — absences"
           rows={report.absentEmployees}
           pageSize={5}
           columns={[

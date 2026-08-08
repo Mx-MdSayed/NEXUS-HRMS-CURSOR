@@ -18,7 +18,7 @@ import {
   calculateHeadcount,
   countBy,
   groupByCurrency,
-  salaryRangeBucket,
+  salaryRangeBucketForCurrency,
   salaryRangeBucketsByCurrency,
   tenureBucket,
   tenureMonths,
@@ -44,8 +44,10 @@ import type {
 import { ReportServiceError } from './errors'
 
 function hasReportPermission(auth: ReportAuthContext, permission: PermissionName): boolean {
-  if (auth.hasPermission) return auth.hasPermission(permission)
-  return auth.permissions.includes(permission)
+  if (auth.hasPermission) {
+    return auth.hasPermission(permission) || auth.hasPermission(PERMISSIONS.REPORT_ADMIN)
+  }
+  return auth.permissions.includes(permission) || auth.permissions.includes(PERMISSIONS.REPORT_ADMIN)
 }
 
 function authorize(auth: ReportAuthContext, permission: PermissionName): void {
@@ -191,14 +193,18 @@ export const reportService = {
 
   async getEmployeeReport(filters: ReportFilters, auth: ReportAuthContext): Promise<EmployeeReport> {
     authorize(auth, PERMISSIONS.REPORT_EMPLOYEE)
-    const employees = filterByRange(await getEmployees(filters), filters)
+    const range = resolveDateRange(filters)
+    const employees = await getEmployees(filters)
     const rows = employees.map(toEmployeeReportRow)
+    const newJoiners = rows
+      .filter((employee) => employee.joiningDate >= range.startDate && employee.joiningDate <= range.endDate)
+      .sort((a, b) => b.joiningDate.localeCompare(a.joiningDate))
     return {
       rows,
       total: rows.length,
       active: rows.filter((employee) => employee.employmentStatus === 'active').length,
       inactive: rows.filter((employee) => employee.employmentStatus !== 'active').length,
-      newJoiners: [...rows].sort((a, b) => b.joiningDate.localeCompare(a.joiningDate)).slice(0, 6),
+      newJoiners,
       statusDistribution: countBy(rows, (employee) => employee.employmentStatus),
       departmentDistribution: countBy(rows, (employee) => employee.departmentName),
     }
@@ -352,14 +358,23 @@ export const reportService = {
         annualCTC: number
       }>())
     const departmentTotals = Array.from(departmentTotalsMap.values())
+    const distributionByCurrency = Array.from(
+      enrichedRows.reduce((map, row) => {
+        const list = map.get(row.currency) ?? []
+        list.push(row)
+        map.set(row.currency, list)
+        return map
+      }, new Map<SalaryCurrencyCode, SalaryReportRow[]>()),
+    ).map(([currency, currencyRows]) => ({
+      currency,
+      buckets: countBy(currencyRows, (row) => salaryRangeBucketForCurrency(row.monthlyGross, currency)),
+    }))
     return {
       rows: enrichedRows,
       totalsByCurrency: salaryTotals(enrichedRows),
       departmentTotals,
-      distribution: countBy(
-        enrichedRows.filter((row) => row.currency === 'INR'),
-        (row) => salaryRangeBucket(row.monthlyGross),
-      ),
+      distribution: distributionByCurrency.find((item) => item.currency === 'INR')?.buckets ?? [],
+      distributionByCurrency,
     }
   },
 

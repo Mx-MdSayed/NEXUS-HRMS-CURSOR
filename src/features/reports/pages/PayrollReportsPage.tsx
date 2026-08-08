@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Banknote, CheckCircle2, Clock3 } from 'lucide-react'
 import { Card, CardContent, ErrorState, PageLoader } from '@/components/ui'
-import { useAuth } from '@/contexts/AuthContext'
 import { formatSalaryAmount } from '@/features/salary/utils/money'
 import {
   ReportFilters,
@@ -10,9 +9,9 @@ import {
   ReportPageShell,
   ReportTable,
 } from '../components'
+import { useReportQuery } from '../hooks/useReportQuery'
 import { reportService } from '../services/reportService'
 import type { PayrollReport, ReportFilters as ReportFilterValues } from '../types'
-import { getReportErrorMessage } from '../utils/errors'
 
 const defaultFilters: ReportFilterValues = { preset: 'this_year' }
 
@@ -20,31 +19,13 @@ type PayrollRunRow = PayrollReport['runs'][number]
 type DepartmentPayrollRow = PayrollReport['departmentSummary'][number]
 
 export function PayrollReportsPage() {
-  const { hasPermission } = useAuth()
   const [filters, setFilters] = useState<ReportFilterValues>(defaultFilters)
-  const [report, setReport] = useState<PayrollReport | null>(null)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const data = await reportService.getPayrollReport(filters, { permissions: [], hasPermission })
-        if (!cancelled) setReport(data)
-      } catch (err) {
-        if (!cancelled) setError(getReportErrorMessage(err))
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [filters, hasPermission])
+  const loader = useCallback(
+    (nextFilters: ReportFilterValues, auth: Parameters<typeof reportService.getPayrollReport>[1]) =>
+      reportService.getPayrollReport(nextFilters, auth),
+    [],
+  )
+  const { data: report, error, isLoading } = useReportQuery(filters, loader)
 
   if (isLoading && !report) return <PageLoader label="Loading payroll report" />
   if (error || !report) return <ErrorState title="Unable to load payroll report" message={error} />

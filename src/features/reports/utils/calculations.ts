@@ -68,11 +68,22 @@ export function tenureBucket(months: number): string {
 }
 
 export function salaryRangeBucket(amount: number): string {
-  if (amount < 50000) return '<50k'
-  if (amount < 100000) return '50k-100k'
-  if (amount < 200000) return '100k-200k'
-  if (amount < 300000) return '200k-300k'
-  return '300k+'
+  if (amount < 25000) return '< ₹25K'
+  if (amount < 50000) return '₹25K–₹50K'
+  if (amount < 75000) return '₹50K–₹75K'
+  if (amount < 100000) return '₹75K–₹1L'
+  return '₹1L+'
+}
+
+export function salaryRangeBucketForCurrency(amount: number, currency: SalaryCurrencyCode): string {
+  if (currency !== 'INR') {
+    if (amount < 25000) return '< 25K'
+    if (amount < 50000) return '25K–50K'
+    if (amount < 75000) return '50K–75K'
+    if (amount < 100000) return '75K–100K'
+    return '100K+'
+  }
+  return salaryRangeBucket(amount)
 }
 
 export function salaryRangeBucketsByCurrency(assignments: EmployeeSalary[]): Array<{
@@ -85,6 +96,6 @@ export function salaryRangeBucketsByCurrency(assignments: EmployeeSalary[]): Arr
   })
   return Array.from(byCurrency.entries()).map(([currency, rows]) => ({
     currency,
-    buckets: countBy(rows, (row) => salaryRangeBucket(row.monthlyGross)),
+    buckets: countBy(rows, (row) => salaryRangeBucketForCurrency(row.monthlyGross, currency)),
   }))
 }

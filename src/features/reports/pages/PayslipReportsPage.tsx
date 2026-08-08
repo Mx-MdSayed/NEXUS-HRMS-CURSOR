@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Archive, FileCheck2, FileText } from 'lucide-react'
 import { Card, CardContent, ErrorState, PageLoader } from '@/components/ui'
-import { useAuth } from '@/contexts/AuthContext'
 import { formatSalaryAmount } from '@/features/salary/utils/money'
 import { formatDate } from '@/utils/date'
 import {
@@ -11,40 +10,22 @@ import {
   ReportPieChart,
   ReportTable,
 } from '../components'
+import { useReportQuery } from '../hooks/useReportQuery'
 import { reportService } from '../services/reportService'
 import type { PayslipReport, ReportFilters as ReportFilterValues } from '../types'
-import { getReportErrorMessage } from '../utils/errors'
 
 const defaultFilters: ReportFilterValues = { preset: 'this_year' }
 
 type PayslipReportRow = PayslipReport['rows'][number]
 
 export function PayslipReportsPage() {
-  const { hasPermission } = useAuth()
   const [filters, setFilters] = useState<ReportFilterValues>(defaultFilters)
-  const [report, setReport] = useState<PayslipReport | null>(null)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const data = await reportService.getPayslipReport(filters, { permissions: [], hasPermission })
-        if (!cancelled) setReport(data)
-      } catch (err) {
-        if (!cancelled) setError(getReportErrorMessage(err))
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [filters, hasPermission])
+  const loader = useCallback(
+    (nextFilters: ReportFilterValues, auth: Parameters<typeof reportService.getPayslipReport>[1]) =>
+      reportService.getPayslipReport(nextFilters, auth),
+    [],
+  )
+  const { data: report, error, isLoading } = useReportQuery(filters, loader)
 
   if (isLoading && !report) return <PageLoader label="Loading payslip report" />
   if (error || !report) return <ErrorState title="Unable to load payslip report" message={error} />

@@ -1,3 +1,4 @@
+export { ReportAreaChart } from './ReportAreaChart'
 export { ReportBarChart } from './ReportBarChart'
 export { ReportDateFilter } from './ReportDateFilter'
 export { ReportFilters } from './ReportFilters'

@@ -1,5 +1,6 @@
 import type { PermissionName, RoleName, User } from '@/types'
 import { getPermissionsForRole } from '@/constants/rbac'
+import { PERMISSIONS } from '@/constants/permissions'
 import { ROLES } from '@/constants/roles'
 
 export function getUserPermissions(user: User | null | undefined): PermissionName[] {
@@ -13,6 +14,10 @@ export function hasRole(user: User | null | undefined, role: RoleName | RoleName
   return roles.includes(user.role)
 }
 
+function isReportPermission(permission: PermissionName): boolean {
+  return permission === PERMISSIONS.REPORTS_VIEW || permission.startsWith('report.')
+}
+
 export function hasPermission(
   user: User | null | undefined,
   permission: PermissionName | PermissionName[],
@@ -20,6 +25,9 @@ export function hasPermission(
   if (!user) return false
   const permissions = getUserPermissions(user)
   const required = Array.isArray(permission) ? permission : [permission]
+  if (permissions.includes(PERMISSIONS.REPORT_ADMIN) && required.some(isReportPermission)) {
+    return true
+  }
   return required.some((item) => permissions.includes(item))
 }
 

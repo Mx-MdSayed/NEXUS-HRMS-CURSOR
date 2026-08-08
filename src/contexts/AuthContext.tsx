@@ -110,6 +110,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result.session.user
   }, [])
 
+  const hasPermission = useCallback(
+    (permission: PermissionName | PermissionName[]) => checkPermission(user, permission),
+    [user],
+  )
+  const hasAnyPermission = useCallback(
+    (permissions: PermissionName[]) => checkAnyPermission(user, permissions),
+    [user],
+  )
+  const hasAllPermissions = useCallback(
+    (permissions: PermissionName[]) => checkAllPermissions(user, permissions),
+    [user],
+  )
+  const hasRole = useCallback(
+    (role: RoleName | RoleName[]) => checkRole(user, role),
+    [user],
+  )
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -118,13 +135,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       refreshSession,
-      hasPermission: (permission) => checkPermission(user, permission),
-      hasAnyPermission: (permissions) => checkAnyPermission(user, permissions),
-      hasAllPermissions: (permissions) => checkAllPermissions(user, permissions),
-      hasRole: (role) => checkRole(user, role),
+      hasPermission,
+      hasAnyPermission,
+      hasAllPermissions,
+      hasRole,
       rememberedEmail,
     }),
-    [user, isLoading, login, logout, refreshSession, rememberedEmail],
+    [
+      user,
+      isLoading,
+      login,
+      logout,
+      refreshSession,
+      hasPermission,
+      hasAnyPermission,
+      hasAllPermissions,
+      hasRole,
+      rememberedEmail,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

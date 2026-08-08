@@ -209,6 +209,7 @@ export interface SalaryReport {
   totalsByCurrency: CurrencyTotal[]
   departmentTotals: Array<CurrencyTotal & { departmentId: string; departmentName: string }>
   distribution: ChartDatum[]
+  distributionByCurrency: Array<{ currency: SalaryCurrencyCode; buckets: ChartDatum[] }>
 }
 
 export interface PayrollReport {

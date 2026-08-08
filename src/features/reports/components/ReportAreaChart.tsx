@@ -1,6 +1,6 @@
 import {
-  Bar,
-  BarChart,
+  Area,
+  AreaChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -10,13 +10,13 @@ import {
 import { Card, CardContent } from '@/components/ui'
 import type { ChartDatum } from '../types'
 
-interface ReportBarChartProps {
+interface ReportAreaChartProps {
   title: string
   data: ChartDatum[]
   dataKey?: string
 }
 
-export function ReportBarChart({ title, data, dataKey = 'value' }: ReportBarChartProps) {
+export function ReportAreaChart({ title, data, dataKey = 'value' }: ReportAreaChartProps) {
   return (
     <Card>
       <CardContent>
@@ -28,13 +28,19 @@ export function ReportBarChart({ title, data, dataKey = 'value' }: ReportBarChar
             </p>
           ) : (
             <ResponsiveContainer width="100%" height="100%" debounce={50}>
-              <BarChart data={data}>
+              <AreaChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Bar dataKey={dataKey} fill="#247470" radius={[6, 6, 0, 0]} />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey={dataKey}
+                  stroke="#247470"
+                  fill="#247470"
+                  fillOpacity={0.2}
+                />
+              </AreaChart>
             </ResponsiveContainer>
           )}
         </div>

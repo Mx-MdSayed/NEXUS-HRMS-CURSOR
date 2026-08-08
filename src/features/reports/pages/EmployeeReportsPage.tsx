@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { UserCheck, UserPlus, Users } from 'lucide-react'
 import { Card, CardContent, ErrorState, PageLoader } from '@/components/ui'
-import { useAuth } from '@/contexts/AuthContext'
 import { formatDate } from '@/utils/date'
 import {
   ReportBarChart,
@@ -11,38 +10,20 @@ import {
   ReportPieChart,
   ReportTable,
 } from '../components'
+import { useReportQuery } from '../hooks/useReportQuery'
 import { reportService } from '../services/reportService'
-import type { EmployeeReport, EmployeeReportRow, ReportFilters as ReportFilterValues } from '../types'
-import { getReportErrorMessage } from '../utils/errors'
+import type { EmployeeReportRow, ReportFilters as ReportFilterValues } from '../types'
 
 const defaultFilters: ReportFilterValues = { preset: 'this_month' }
 
 export function EmployeeReportsPage() {
-  const { hasPermission } = useAuth()
   const [filters, setFilters] = useState<ReportFilterValues>(defaultFilters)
-  const [report, setReport] = useState<EmployeeReport | null>(null)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const data = await reportService.getEmployeeReport(filters, { permissions: [], hasPermission })
-        if (!cancelled) setReport(data)
-      } catch (err) {
-        if (!cancelled) setError(getReportErrorMessage(err))
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [filters, hasPermission])
+  const loader = useCallback(
+    (nextFilters: ReportFilterValues, auth: Parameters<typeof reportService.getEmployeeReport>[1]) =>
+      reportService.getEmployeeReport(nextFilters, auth),
+    [],
+  )
+  const { data: report, error, isLoading } = useReportQuery(filters, loader)
 
   if (isLoading && !report) return <PageLoader label="Loading employee report" />
   if (error || !report) return <ErrorState title="Unable to load employee report" message={error} />
@@ -64,7 +45,18 @@ export function EmployeeReportsPage() {
       ]}
       exportRows={report.rows}
     >
-      <ReportFilters value={filters} onApply={setFilters} onReset={() => setFilters(defaultFilters)} showStatus />
+      <ReportFilters
+        value={filters}
+        onApply={setFilters}
+        onReset={() => setFilters(defaultFilters)}
+        showStatus
+        statusOptions={[
+          { label: 'Active', value: 'active' },
+          { label: 'Inactive', value: 'inactive' },
+          { label: 'Probation', value: 'probation' },
+          { label: 'Terminated', value: 'terminated' },
+        ]}
+      />
       <div className="grid gap-4 sm:grid-cols-3">
         <ReportKpiCard title="Total employees" value={report.total} icon={Users} />
         <ReportKpiCard title="Active" value={report.active} icon={UserCheck} />
@@ -77,15 +69,22 @@ export function EmployeeReportsPage() {
       <Card>
         <CardContent>
           <h2 className="mb-3 text-card-title">New joiners</h2>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {report.newJoiners.map((employee) => (
-              <div key={employee.employeeId} className="rounded-lg border border-surface-200 p-3 dark:border-surface-800">
-                <p className="font-medium text-surface-900 dark:text-surface-50">{employee.fullName}</p>
-                <p className="text-sm text-surface-500">{employee.departmentName}</p>
-                <p className="mt-1 text-xs text-surface-500">Joined {formatDate(employee.joiningDate)}</p>
-              </div>
-            ))}
-          </div>
+          {report.newJoiners.length === 0 ? (
+            <p className="text-sm text-surface-500">No employees found for the selected joining period.</p>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {report.newJoiners.map((employee) => (
+                <div
+                  key={employee.employeeId}
+                  className="rounded-lg border border-surface-200 p-3 dark:border-surface-800"
+                >
+                  <p className="font-medium text-surface-900 dark:text-surface-50">{employee.fullName}</p>
+                  <p className="text-sm text-surface-500">{employee.departmentName}</p>
+                  <p className="mt-1 text-xs text-surface-500">Joined {formatDate(employee.joiningDate)}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
       <ReportTable<EmployeeReportRow>

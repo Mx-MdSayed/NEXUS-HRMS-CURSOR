@@ -1,39 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { BarChart3, Building2, FileText, Users } from 'lucide-react'
 import { ErrorState, PageHeader, PageLoader } from '@/components/ui'
-import { useAuth } from '@/contexts/AuthContext'
 import { ReportBarChart, ReportKpiCard, ReportNav, ReportPieChart } from '../components'
+import { useReportQuery } from '../hooks/useReportQuery'
 import { reportService } from '../services/reportService'
-import type { OverviewReport } from '../types'
-import { getReportErrorMessage } from '../utils/errors'
+import type { ReportFilters } from '../types'
+
+const defaultFilters: ReportFilters = { preset: 'this_month' }
 
 export function ReportsIndexPage() {
-  const { hasPermission } = useAuth()
-  const [report, setReport] = useState<OverviewReport | null>(null)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      try {
-        const data = await reportService.getOverviewReport(
-          { preset: 'this_month' },
-          { permissions: [], hasPermission },
-        )
-        if (!cancelled) setReport(data)
-      } catch (err) {
-        if (!cancelled) setError(getReportErrorMessage(err))
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [hasPermission])
+  const loader = useCallback(
+    (filters: ReportFilters, auth: Parameters<typeof reportService.getOverviewReport>[1]) =>
+      reportService.getOverviewReport(filters, auth),
+    [],
+  )
+  const { data: report, error, isLoading } = useReportQuery(defaultFilters, loader)
 
   if (isLoading) return <PageLoader label="Loading reports" />
   if (error || !report) return <ErrorState title="Unable to load reports" message={error} />

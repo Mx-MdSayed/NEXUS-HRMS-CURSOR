@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { ShieldCheck, UserCheck, Users } from 'lucide-react'
 import { ErrorState, PageLoader } from '@/components/ui'
-import { useAuth } from '@/contexts/AuthContext'
 import {
   ReportBarChart,
   ReportFilters,
@@ -9,38 +8,20 @@ import {
   ReportPageShell,
   ReportPieChart,
 } from '../components'
+import { useReportQuery } from '../hooks/useReportQuery'
 import { reportService } from '../services/reportService'
-import type { ReportFilters as ReportFilterValues, WorkforceReport } from '../types'
-import { getReportErrorMessage } from '../utils/errors'
+import type { ReportFilters as ReportFilterValues } from '../types'
 
 const defaultFilters: ReportFilterValues = { preset: 'this_month' }
 
 export function WorkforceReportsPage() {
-  const { hasPermission } = useAuth()
   const [filters, setFilters] = useState<ReportFilterValues>(defaultFilters)
-  const [report, setReport] = useState<WorkforceReport | null>(null)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const data = await reportService.getWorkforceReport(filters, { permissions: [], hasPermission })
-        if (!cancelled) setReport(data)
-      } catch (err) {
-        if (!cancelled) setError(getReportErrorMessage(err))
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [filters, hasPermission])
+  const loader = useCallback(
+    (nextFilters: ReportFilterValues, auth: Parameters<typeof reportService.getWorkforceReport>[1]) =>
+      reportService.getWorkforceReport(nextFilters, auth),
+    [],
+  )
+  const { data: report, error, isLoading } = useReportQuery(filters, loader)
 
   if (isLoading && !report) return <PageLoader label="Loading workforce report" />
   if (error || !report) return <ErrorState title="Unable to load workforce report" message={error} />

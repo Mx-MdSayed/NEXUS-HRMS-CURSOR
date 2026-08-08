@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { BarChart3, FileText, Users, Wallet } from 'lucide-react'
 import { ErrorState, PageLoader } from '@/components/ui'
-import { useAuth } from '@/contexts/AuthContext'
 import { formatSalaryAmount } from '@/features/salary/utils/money'
 import {
   ReportBarChart,
@@ -10,38 +9,20 @@ import {
   ReportPageShell,
   ReportPieChart,
 } from '../components'
+import { useReportQuery } from '../hooks/useReportQuery'
 import { reportService } from '../services/reportService'
-import type { OverviewReport, ReportFilters as ReportFilterValues } from '../types'
-import { getReportErrorMessage } from '../utils/errors'
+import type { ReportFilters as ReportFilterValues } from '../types'
 
 const defaultFilters: ReportFilterValues = { preset: 'this_month' }
 
 export function ReportsOverviewPage() {
-  const { hasPermission } = useAuth()
   const [filters, setFilters] = useState<ReportFilterValues>(defaultFilters)
-  const [report, setReport] = useState<OverviewReport | null>(null)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const data = await reportService.getOverviewReport(filters, { permissions: [], hasPermission })
-        if (!cancelled) setReport(data)
-      } catch (err) {
-        if (!cancelled) setError(getReportErrorMessage(err))
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [filters, hasPermission])
+  const loader = useCallback(
+    (nextFilters: ReportFilterValues, auth: Parameters<typeof reportService.getOverviewReport>[1]) =>
+      reportService.getOverviewReport(nextFilters, auth),
+    [],
+  )
+  const { data: report, error, isLoading } = useReportQuery(filters, loader)
 
   if (isLoading && !report) return <PageLoader label="Loading report overview" />
   if (error || !report) return <ErrorState title="Unable to load overview" message={error} />

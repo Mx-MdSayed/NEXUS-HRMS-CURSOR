@@ -1,7 +1,17 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { flexRender, type ColumnVisibilityState, type SortingState } from '@tanstack/react-table'
-import { getCoreRowModel, useLegacyTable } from '@tanstack/react-table/legacy'
+import {
+  flexRender,
+  type ColumnVisibilityState,
+  type PaginationState,
+  type SortingState,
+} from '@tanstack/react-table'
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useLegacyTable,
+} from '@tanstack/react-table/legacy'
 import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Search } from 'lucide-react'
 import { Button, Card, CardContent, EmptyState, Input } from '@/components/ui'
 
@@ -28,54 +38,58 @@ export function ReportTable<T extends object>({
   pageSize = 10,
 }: ReportTableProps<T>) {
   const [search, setSearch] = useState('')
-  const [page, setPage] = useState(1)
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>({})
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize,
+  })
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return rows
-    return rows.filter((row) => JSON.stringify(row).toLowerCase().includes(q))
-  }, [rows, search])
+  const columnSignature = columns.map((column) => `${String(column.key)}:${column.header}`).join('|')
 
-  const sorted = useMemo(() => {
-    const sort = sorting[0]
-    if (!sort) return filtered
-    return [...filtered].sort((a, b) => {
-      const left = String(a[sort.id as keyof T] ?? '')
-      const right = String(b[sort.id as keyof T] ?? '')
-      const compared = left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' })
-      return sort.desc ? -compared : compared
-    })
-  }, [filtered, sorting])
-
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
-  const safePage = Math.min(page, totalPages)
-  const paginated = sorted.slice((safePage - 1) * pageSize, safePage * pageSize)
-
-  const tableColumns = useMemo(() => {
-    return columns.map((column) => ({
+  const tableColumns = useMemo(
+    () =>
+      columns.map((column) => ({
         id: String(column.key),
-        accessorKey: String(column.key),
+        accessorFn: (row: T) => row[column.key],
         header: column.header,
         enableHiding: column.enableHiding ?? true,
         cell: (info: { row: { original: T }; getValue: () => unknown }) =>
           column.render ? column.render(info.row.original) : String(info.getValue() ?? '—'),
-      }))
-  }, [columns])
+      })),
+    // Column renderers are captured from the latest matching signature.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [columnSignature],
+  )
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return rows
+    const keys = columnSignature.split('|').map((part) => part.split(':')[0] ?? '')
+    return rows.filter((row) =>
+      keys.some((key) => String(row[key as keyof T] ?? '').toLowerCase().includes(q)),
+    )
+  }, [columnSignature, rows, search])
 
   const table = useLegacyTable({
-    data: paginated,
+    data: filtered,
     columns: tableColumns as never,
-    state: { sorting, columnVisibility },
-    onSortingChange: (updater) => {
-      setPage(1)
-      setSorting((prev) => (typeof updater === 'function' ? updater(prev) : updater))
+    state: {
+      sorting,
+      columnVisibility,
+      pagination,
     },
+    onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
-    manualSorting: true,
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   })
+
+  const pageCount = Math.max(1, table.getPageCount())
+  const pageIndex = table.getState().pagination.pageIndex
+  const visibleRows = table.getRowModel().rows
 
   return (
     <Card>
@@ -88,10 +102,11 @@ export function ReportTable<T extends object>({
               placeholder={searchPlaceholder}
               value={search}
               onChange={(event) => {
-                setPage(1)
                 setSearch(event.target.value)
+                setPagination((prev) => ({ ...prev, pageIndex: 0 }))
               }}
               leftIcon={<Search className="h-4 w-4" />}
+              aria-label={`Search ${title}`}
             />
             <details className="relative">
               <summary className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-surface-300 px-3 text-sm dark:border-surface-700">
@@ -115,7 +130,9 @@ export function ReportTable<T extends object>({
         </div>
 
         {rows.length === 0 ? (
-          <EmptyState title="No report rows" description="No data matched the selected report filters." />
+          <EmptyState title="No report rows" description="No data available for the selected filters." />
+        ) : filtered.length === 0 ? (
+          <EmptyState title="No matching rows" description="No rows matched the current table search." />
         ) : (
           <>
             <div className="overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-800">
@@ -126,6 +143,7 @@ export function ReportTable<T extends object>({
                       {headerGroup.headers.map((header) => (
                         <th
                           key={header.id}
+                          scope="col"
                           className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-surface-500"
                         >
                           <button
@@ -135,11 +153,11 @@ export function ReportTable<T extends object>({
                           >
                             {flexRender(header.column.columnDef.header, header.getContext())}
                             {header.column.getIsSorted() === 'asc' ? (
-                              <ArrowUp className="h-3 w-3" />
+                              <ArrowUp className="h-3 w-3" aria-hidden />
                             ) : header.column.getIsSorted() === 'desc' ? (
-                              <ArrowDown className="h-3 w-3" />
+                              <ArrowDown className="h-3 w-3" aria-hidden />
                             ) : (
-                              <ArrowUpDown className="h-3 w-3" />
+                              <ArrowUpDown className="h-3 w-3" aria-hidden />
                             )}
                           </button>
                         </th>
@@ -148,7 +166,7 @@ export function ReportTable<T extends object>({
                   ))}
                 </thead>
                 <tbody className="divide-y divide-surface-100 bg-white dark:divide-surface-800 dark:bg-surface-900">
-                  {table.getRowModel().rows.map((row) => (
+                  {visibleRows.map((row) => (
                     <tr key={row.id}>
                       {row.getVisibleCells().map((cell) => (
                         <td key={cell.id} className="px-4 py-3 text-surface-700 dark:text-surface-200">
@@ -162,20 +180,25 @@ export function ReportTable<T extends object>({
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-surface-500 no-print">
               <span>
-                Showing {paginated.length} of {sorted.length} rows
+                Showing {visibleRows.length} of {filtered.length} rows
               </span>
               <div className="flex gap-2">
-                <Button variant="secondary" size="sm" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={!table.getCanPreviousPage()}
+                  onClick={() => table.previousPage()}
+                >
                   Previous
                 </Button>
                 <span className="flex items-center px-2">
-                  Page {safePage} of {totalPages}
+                  Page {pageIndex + 1} of {pageCount}
                 </span>
                 <Button
                   variant="secondary"
                   size="sm"
-                  disabled={safePage >= totalPages}
-                  onClick={() => setPage(safePage + 1)}
+                  disabled={!table.getCanNextPage()}
+                  onClick={() => table.nextPage()}
                 >
                   Next
                 </Button>

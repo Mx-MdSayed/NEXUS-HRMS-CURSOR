@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Wallet } from 'lucide-react'
 import { Card, CardContent, ErrorState, PageLoader } from '@/components/ui'
-import { useAuth } from '@/contexts/AuthContext'
 import { formatSalaryAmount } from '@/features/salary/utils/money'
 import { formatDate } from '@/utils/date'
 import {
@@ -11,38 +10,20 @@ import {
   ReportPageShell,
   ReportTable,
 } from '../components'
+import { useReportQuery } from '../hooks/useReportQuery'
 import { reportService } from '../services/reportService'
-import type { ReportFilters as ReportFilterValues, SalaryReport, SalaryReportRow } from '../types'
-import { getReportErrorMessage } from '../utils/errors'
+import type { ReportFilters as ReportFilterValues, SalaryReportRow } from '../types'
 
 const defaultFilters: ReportFilterValues = { preset: 'this_month' }
 
 export function SalaryReportsPage() {
-  const { hasPermission } = useAuth()
   const [filters, setFilters] = useState<ReportFilterValues>(defaultFilters)
-  const [report, setReport] = useState<SalaryReport | null>(null)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      setError('')
-      try {
-        const data = await reportService.getSalaryReport(filters, { permissions: [], hasPermission })
-        if (!cancelled) setReport(data)
-      } catch (err) {
-        if (!cancelled) setError(getReportErrorMessage(err))
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [filters, hasPermission])
+  const loader = useCallback(
+    (nextFilters: ReportFilterValues, auth: Parameters<typeof reportService.getSalaryReport>[1]) =>
+      reportService.getSalaryReport(nextFilters, auth),
+    [],
+  )
+  const { data: report, error, isLoading } = useReportQuery(filters, loader)
 
   if (isLoading && !report) return <PageLoader label="Loading salary report" />
   if (error || !report) return <ErrorState title="Unable to load salary report" message={error} />
@@ -82,27 +63,37 @@ export function SalaryReportsPage() {
         ))}
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
-        <ReportBarChart title="INR salary distribution" data={report.distribution} />
+        {report.distributionByCurrency.map((item) => (
+          <ReportBarChart
+            key={item.currency}
+            title={`Salary ranges (${item.currency})`}
+            data={item.buckets}
+          />
+        ))}
         <Card>
           <CardContent>
             <h2 className="mb-4 text-card-title">Department salary totals</h2>
             <div className="space-y-3">
-              {report.departmentTotals.map((row) => (
-                <div
-                  key={`${row.departmentId}-${row.currency}`}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-surface-200 p-3 dark:border-surface-800"
-                >
-                  <div>
-                    <p className="font-medium text-surface-900 dark:text-surface-50">{row.departmentName}</p>
-                    <p className="text-xs text-surface-500">
-                      {row.count} employees · {row.currency}
+              {report.departmentTotals.length === 0 ? (
+                <p className="text-sm text-surface-500">No salary data found.</p>
+              ) : (
+                report.departmentTotals.map((row) => (
+                  <div
+                    key={`${row.departmentId}-${row.currency}`}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-surface-200 p-3 dark:border-surface-800"
+                  >
+                    <div>
+                      <p className="font-medium text-surface-900 dark:text-surface-50">{row.departmentName}</p>
+                      <p className="text-xs text-surface-500">
+                        {row.count} employees · {row.currency}
+                      </p>
+                    </div>
+                    <p className="font-semibold">
+                      {formatSalaryAmount(row.monthlyGross ?? 0, row.currency)}
                     </p>
                   </div>
-                  <p className="font-semibold">
-                    {formatSalaryAmount(row.monthlyGross ?? 0, row.currency)}
-                  </p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
