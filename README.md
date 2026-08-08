@@ -8,6 +8,12 @@ Professional Basic-to-Mid-Level Human Resource Management System.
 - **Module 2** — Design system & reusable UI components (complete)
 - **Module 3** — Authentication & RBAC (complete)
 - **Module 4** — Dashboard & core overview (complete)
+- **Module 5** — Employee management (complete)
+- **Module 6** — Department & designation management (complete)
+- **Module 7** — Attendance management (complete)
+- **Module 8** — Leave management (complete)
+- **Module 9** — Salary structure & compensation (complete)
+- **Module 10** — Payroll management (complete)
 
 ## Getting started
 
@@ -15,6 +21,13 @@ Professional Basic-to-Mid-Level Human Resource Management System.
 npm install
 npm run dev
 ```
+
+## Scripts
+
+- `npm run dev` — start development server
+- `npm run build` — typecheck and production build
+- `npm run preview` — preview production build
+- `npm run lint` — run oxlint
 
 ## Development auth accounts (mock only)
 
