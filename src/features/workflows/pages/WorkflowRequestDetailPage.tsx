@@ -94,8 +94,9 @@ export function WorkflowRequestDetailPage() {
   if (!workflow) return <Card><CardContent>Loading workflow...</CardContent></Card>
 
   const canAct =
-    hasPermission('workflow.approve') &&
-    workflow.assignedToId === employeeId &&
+    (hasPermission('workflow.approve') || hasPermission('workflow.manage')) &&
+    Boolean(employeeId) &&
+    (workflow.assignedToId === employeeId || hasPermission('workflow.manage') || hasPermission('workflow.admin')) &&
     workflow.requesterId !== employeeId &&
     (workflow.status === 'pending' || workflow.status === 'under_review')
 

@@ -16,11 +16,16 @@ export function WorkflowRequestsPage() {
   useEffect(() => {
     if (!user) return
     void (async () => {
+      const canManage = hasPermission('workflow.manage') || hasPermission('workflow.admin')
       const employeeId = await notificationTriggerService.resolveLinkedEmployeeId(user)
+      if (!canManage && !employeeId) {
+        setRows([])
+        return
+      }
       const page = await workflowService.list({
         status,
         search,
-        ownOrAssignedTo: hasPermission('workflow.manage') ? undefined : employeeId,
+        ownOrAssignedTo: canManage ? undefined : employeeId,
       }, 1, 100)
       setRows(page.data)
     })()
