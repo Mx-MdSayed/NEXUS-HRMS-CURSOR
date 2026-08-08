@@ -74,7 +74,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     selfServiceLabel: 'My Payslips',
     path: '/payslips',
     icon: 'FileText',
-    module: 'Later module',
+    module: 'Module 11',
     requiredPermission: PERMISSIONS.PAYSLIP_VIEW,
   },
   {

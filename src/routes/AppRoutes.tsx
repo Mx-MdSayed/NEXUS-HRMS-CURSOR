@@ -60,6 +60,13 @@ import {
   PayrollRunsPage,
   PayrollSettingsPage,
 } from '@/features/payroll'
+import {
+  EmployeePayslipsPage,
+  PayslipDetailPage,
+  PayslipPrintPage,
+  PayslipSettingsPage,
+  PayslipsPage,
+} from '@/features/payslip'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -523,11 +530,39 @@ export function AppRoutes() {
           path="payslips"
           element={
             <PermissionRoute permission={PERMISSIONS.PAYSLIP_VIEW}>
-              <PlaceholderPage
-                title="Payslips"
-                moduleLabel="Later module"
-                description="Payslip generation and employee access will be implemented in a later module."
-              />
+              <PayslipsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payslips/settings"
+          element={
+            <PermissionRoute permission={PERMISSIONS.PAYSLIP_MANAGE}>
+              <PayslipSettingsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payslips/employee/:employeeId"
+          element={
+            <PermissionRoute permission={PERMISSIONS.PAYSLIP_VIEW}>
+              <EmployeePayslipsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payslips/:id/print"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.PAYSLIP_VIEW, PERMISSIONS.PAYSLIP_PRINT]}>
+              <PayslipPrintPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payslips/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.PAYSLIP_VIEW}>
+              <PayslipDetailPage />
             </PermissionRoute>
           }
         />

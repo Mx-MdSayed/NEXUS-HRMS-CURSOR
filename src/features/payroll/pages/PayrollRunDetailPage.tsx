@@ -23,6 +23,12 @@ import {
 import type { StatusTone } from '@/components/ui'
 import { PERMISSIONS } from '@/constants/permissions'
 import { useAuth } from '@/contexts/AuthContext'
+import {
+  getPayslipErrorMessage,
+  payslipService,
+  type BulkGenerationPreview,
+  type Payslip,
+} from '@/features/payslip'
 import { formatSalaryAmount } from '@/features/salary/utils/money'
 import { formatDateTime } from '@/utils/date'
 import { showError, showSuccess } from '@/utils/toast'
@@ -64,14 +70,19 @@ export function PayrollRunDetailPage() {
   const canEdit = hasPermission(PERMISSIONS.PAYROLL_EDIT) || hasPermission(PERMISSIONS.PAYROLL_MANAGE)
   const canDelete =
     hasPermission(PERMISSIONS.PAYROLL_DELETE) || hasPermission(PERMISSIONS.PAYROLL_MANAGE)
+  const canGeneratePayslip =
+    hasPermission(PERMISSIONS.PAYSLIP_GENERATE) || hasPermission(PERMISSIONS.PAYSLIP_MANAGE)
 
   const [run, setRun] = useState<PayrollRun | null>(null)
   const [employees, setEmployees] = useState<PayrollEmployee[]>([])
   const [departmentSummary, setDepartmentSummary] = useState<DepartmentPayrollSummary[]>([])
   const [auditEvents, setAuditEvents] = useState<PayrollAuditEvent[]>([])
+  const [payslips, setPayslips] = useState<Payslip[]>([])
+  const [bulkPreview, setBulkPreview] = useState<BulkGenerationPreview | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [payslipActionLoading, setPayslipActionLoading] = useState<string | null>(null)
   const [cancelOpen, setCancelOpen] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
@@ -87,10 +98,22 @@ export function PayrollRunDetailPage() {
         payrollService.getDepartmentSummary(id),
         payrollService.getAuditEvents(id),
       ])
+      let runPayslips: Payslip[] = []
+      let preview: BulkGenerationPreview | null = null
+      if (runRow.status === 'finalized') {
+        const [allPayslips, previewRow] = await Promise.all([
+          payslipService.getPayslips({}),
+          payslipService.getBulkGenerationPreview(id),
+        ])
+        runPayslips = allPayslips.filter((payslip) => payslip.payrollRunId === id)
+        preview = previewRow
+      }
       setRun(runRow)
       setEmployees(employeeRows)
       setDepartmentSummary(departmentRows)
       setAuditEvents(auditRows)
+      setPayslips(runPayslips)
+      setBulkPreview(preview)
     } catch (err) {
       setError(getPayrollErrorMessage(err, 'Failed to load payroll run.'))
     } finally {
@@ -193,6 +216,11 @@ export function PayrollRunDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actor, canApprove, canCalculate, canDelete, canProcess, canReject, run])
 
+  const payslipsByPayrollEmployeeId = useMemo(
+    () => new Map(payslips.map((payslip) => [payslip.payrollEmployeeId, payslip])),
+    [payslips],
+  )
+
   async function runAction(
     label: string,
     fn: () => Promise<PayrollRun>,
@@ -207,6 +235,19 @@ export function PayrollRunDetailPage() {
       showError(getPayrollErrorMessage(err, `Failed to ${label} payroll.`))
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  async function runPayslipAction(label: string, fn: () => Promise<unknown>, successMessage: string) {
+    setPayslipActionLoading(label)
+    try {
+      await fn()
+      showSuccess(successMessage)
+      await load()
+    } catch (err) {
+      showError(getPayslipErrorMessage(err, `Failed to ${label}.`))
+    } finally {
+      setPayslipActionLoading(null)
     }
   }
 
@@ -239,6 +280,24 @@ export function PayrollRunDetailPage() {
                 Edit
               </Button>
             ) : null}
+            {run.status === 'finalized' && canGeneratePayslip ? (
+              <Button
+                variant="success"
+                isLoading={payslipActionLoading === 'generate all payslips'}
+                disabled={!bulkPreview || bulkPreview.remaining === 0}
+                onClick={() =>
+                  void runPayslipAction(
+                    'generate all payslips',
+                    () => payslipService.generateAllPayslips(run.id, actor),
+                    bulkPreview?.remaining
+                      ? `Generated ${bulkPreview.remaining} payslip(s).`
+                      : 'All payslips are already generated.',
+                  )
+                }
+              >
+                Generate All Payslips
+              </Button>
+            ) : null}
             {actions.map((action) => (
               <Button
                 key={action.label}
@@ -260,6 +319,40 @@ export function PayrollRunDetailPage() {
               This payroll run is finalized and locked. Employee calculations, totals, and audit history are
               read-only.
             </p>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {run.status === 'finalized' && bulkPreview ? (
+        <Card className="border-info-100 bg-info-50/70 dark:border-info-950 dark:bg-info-950/30">
+          <CardContent>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-info-700 dark:text-info-100">
+                  Payslip generation
+                </p>
+                <p className="mt-1 text-sm text-info-700 dark:text-info-100">
+                  {bulkPreview.alreadyGenerated} of {bulkPreview.total} payslips generated;{' '}
+                  {bulkPreview.remaining} remaining.
+                </p>
+              </div>
+              {canGeneratePayslip && bulkPreview.remaining > 0 ? (
+                <Button
+                  size="sm"
+                  variant="success"
+                  isLoading={payslipActionLoading === 'generate all payslips'}
+                  onClick={() =>
+                    void runPayslipAction(
+                      'generate all payslips',
+                      () => payslipService.generateAllPayslips(run.id, actor),
+                      `Generated ${bulkPreview.remaining} payslip(s).`,
+                    )
+                  }
+                >
+                  Generate remaining
+                </Button>
+              ) : null}
+            </div>
           </CardContent>
         </Card>
       ) : null}
@@ -301,49 +394,80 @@ export function PayrollRunDetailPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.map((employee) => (
-                  <TableRow key={employee.id}>
-                    <TableCell>
-                      <button
-                        type="button"
-                        className="text-left font-medium text-brand-700 hover:underline dark:text-brand-300"
-                        onClick={() =>
-                          navigate(`/payroll/employees/${employee.employeeId}?runId=${run.id}`)
-                        }
-                      >
-                        {employee.employeeName}
-                      </button>
-                      <div className="text-xs text-surface-500">{employee.employeeCode}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div>{employee.departmentName}</div>
-                      <div className="text-xs text-surface-500">{employee.designationName}</div>
-                    </TableCell>
-                    <TableCell className="tabular-nums">{employee.presentDays}</TableCell>
-                    <TableCell className="tabular-nums">{employee.unpaidLeaveDays}</TableCell>
-                    <TableCell className="tabular-nums">{employee.overtimeHours}</TableCell>
-                    <TableCell className="tabular-nums">
-                      {formatSalaryAmount(employee.grossEarnings, employee.currency)}
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {formatSalaryAmount(employee.totalDeductions, employee.currency)}
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {formatSalaryAmount(employee.netSalary, employee.currency)}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge
-                        status={EMPLOYEE_STATUS_TONE[employee.status]}
-                        label={PAYROLL_EMPLOYEE_STATUS_LABELS[employee.status]}
-                      />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <TableActions
-                        onView={() => navigate(`/payroll/employees/${employee.employeeId}?runId=${run.id}`)}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {employees.map((employee) => {
+                  const payslip = payslipsByPayrollEmployeeId.get(employee.id)
+                  return (
+                    <TableRow key={employee.id}>
+                      <TableCell>
+                        <button
+                          type="button"
+                          className="text-left font-medium text-brand-700 hover:underline dark:text-brand-300"
+                          onClick={() =>
+                            navigate(`/payroll/employees/${employee.employeeId}?runId=${run.id}`)
+                          }
+                        >
+                          {employee.employeeName}
+                        </button>
+                        <div className="text-xs text-surface-500">{employee.employeeCode}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div>{employee.departmentName}</div>
+                        <div className="text-xs text-surface-500">{employee.designationName}</div>
+                      </TableCell>
+                      <TableCell className="tabular-nums">{employee.presentDays}</TableCell>
+                      <TableCell className="tabular-nums">{employee.unpaidLeaveDays}</TableCell>
+                      <TableCell className="tabular-nums">{employee.overtimeHours}</TableCell>
+                      <TableCell className="tabular-nums">
+                        {formatSalaryAmount(employee.grossEarnings, employee.currency)}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {formatSalaryAmount(employee.totalDeductions, employee.currency)}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {formatSalaryAmount(employee.netSalary, employee.currency)}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge
+                          status={EMPLOYEE_STATUS_TONE[employee.status]}
+                          label={PAYROLL_EMPLOYEE_STATUS_LABELS[employee.status]}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          <TableActions
+                            onView={() => navigate(`/payroll/employees/${employee.employeeId}?runId=${run.id}`)}
+                          />
+                          {run.status === 'finalized' && payslip ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/payslips/${payslip.id}`)}
+                            >
+                              View Payslip
+                            </Button>
+                          ) : null}
+                          {run.status === 'finalized' && !payslip && canGeneratePayslip ? (
+                            <Button
+                              size="sm"
+                              variant="success"
+                              disabled={employee.status !== 'calculated'}
+                              isLoading={payslipActionLoading === `generate payslip ${employee.id}`}
+                              onClick={() =>
+                                void runPayslipAction(
+                                  `generate payslip ${employee.id}`,
+                                  () => payslipService.generatePayslip(employee.id, actor),
+                                  'Payslip generated successfully.',
+                                )
+                              }
+                            >
+                              Generate Payslip
+                            </Button>
+                          ) : null}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </DataTable>
           )}

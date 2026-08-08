@@ -14,6 +14,7 @@ Professional Basic-to-Mid-Level Human Resource Management System.
 - **Module 8** — Leave management (complete)
 - **Module 9** — Salary structure & compensation (complete)
 - **Module 10** — Payroll management (complete)
+- **Module 11** — Payslip & salary document management (complete)
 
 ## Getting started
 

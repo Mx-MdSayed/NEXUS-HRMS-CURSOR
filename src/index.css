@@ -187,3 +187,45 @@
     scrollbar-width: thin;
   }
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body,
+  #root {
+    background: #ffffff !important;
+  }
+
+  aside,
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  .payslip-print-page {
+    min-height: auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .payslip-document {
+    width: 100% !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+    break-inside: auto;
+  }
+
+  .payslip-document table,
+  .payslip-document tr,
+  .payslip-document section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
