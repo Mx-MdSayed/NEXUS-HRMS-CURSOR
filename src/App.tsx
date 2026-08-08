@@ -1,5 +1,6 @@
 import { BrowserRouter } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
+import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { AppRoutes } from '@/routes'
 import 'react-toastify/dist/ReactToastify.css'
@@ -22,8 +23,10 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <AppRoutes />
-        <ThemedToastContainer />
+        <AuthProvider>
+          <AppRoutes />
+          <ThemedToastContainer />
+        </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
   )

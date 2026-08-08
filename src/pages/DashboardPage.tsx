@@ -22,7 +22,7 @@ import {
   StatCard,
   TableContainer,
 } from '@/components/ui'
-import { PLACEHOLDER_USER } from '@/lib/placeholderUser'
+import { useAuth } from '@/contexts/AuthContext'
 import { formatRelativeDate } from '@/utils/date'
 
 const kpiData = [
@@ -55,13 +55,15 @@ const recentActivity = [
 ]
 
 export function DashboardPage() {
+  const { user } = useAuth()
+
   return (
     <div>
       <PageHeader
         title="Dashboard"
-        description={`Welcome back, ${PLACEHOLDER_USER.firstName}. Here is your HRMS overview shell.`}
+        description={`Welcome back, ${user?.firstName ?? 'there'}. Here is your HRMS overview shell.`}
         breadcrumbs={[{ label: 'Home' }, { label: 'Dashboard' }]}
-        actions={<Badge variant="neutral">Module 1 Foundation</Badge>}
+        actions={<Badge variant="neutral">Module 3 Auth</Badge>}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

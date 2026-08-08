@@ -1,27 +1,44 @@
-export type RoleName =
-  | 'super_admin'
-  | 'hr_admin'
-  | 'manager'
-  | 'employee'
-  | 'finance'
+export type RoleName = 'super_admin' | 'hr_admin' | 'employee'
 
 export type PermissionName =
-  | 'employees.view'
-  | 'employees.create'
-  | 'employees.edit'
-  | 'employees.delete'
-  | 'departments.manage'
-  | 'designations.manage'
+  | 'dashboard.view'
+  | 'profile.view'
+  | 'profile.edit'
+  | 'employee.view'
+  | 'employee.create'
+  | 'employee.edit'
+  | 'employee.delete'
+  | 'employee.manage'
+  | 'department.view'
+  | 'department.create'
+  | 'department.edit'
+  | 'department.delete'
+  | 'designation.view'
+  | 'designation.create'
+  | 'designation.edit'
+  | 'designation.delete'
   | 'attendance.view'
   | 'attendance.manage'
+  | 'attendance.correct'
   | 'leave.view'
+  | 'leave.create'
+  | 'leave.approve'
+  | 'leave.reject'
   | 'leave.manage'
   | 'payroll.view'
   | 'payroll.manage'
+  | 'payroll.approve'
+  | 'payslip.view'
+  | 'payslip.manage'
   | 'reports.view'
-  | 'users.manage'
+  | 'notification.view'
+  | 'notification.manage'
+  | 'user.view'
+  | 'user.create'
+  | 'user.edit'
+  | 'user.delete'
+  | 'settings.view'
   | 'settings.manage'
-  | 'notifications.view'
 
 export type EmploymentStatus =
   | 'active'
@@ -29,6 +46,8 @@ export type EmploymentStatus =
   | 'on_leave'
   | 'terminated'
   | 'probation'
+
+export type UserStatus = 'active' | 'inactive' | 'invited' | 'locked'
 
 export interface Permission {
   id: string
@@ -43,17 +62,22 @@ export interface Role {
   permissions: PermissionName[]
 }
 
+/** Authenticated application user — never includes passwords or secrets. */
 export interface User {
   id: string
+  employeeId?: string
   firstName: string
   lastName: string
+  name: string
   email: string
-  avatarUrl?: string
   role: RoleName
-  departmentId?: string
-  designationId?: string
+  avatarUrl?: string
+  status: UserStatus
   employmentStatus: EmploymentStatus
   isActive: boolean
+  lastLoginAt?: string
+  departmentId?: string
+  designationId?: string
   createdAt: string
   updatedAt: string
 }
@@ -61,9 +85,12 @@ export interface User {
 export interface NavigationItem {
   id: string
   label: string
+  /** Label used for employee self-service navigation when provided. */
+  selfServiceLabel?: string
   path: string
   icon: string
   module?: string
+  requiredPermission?: PermissionName | PermissionName[]
 }
 
 export interface Notification {
@@ -87,3 +114,27 @@ export interface CompanySettings {
   fiscalYearStartMonth: number
   workWeekStart: 0 | 1 | 2 | 3 | 4 | 5 | 6
 }
+
+export interface AuthSession {
+  user: User
+  accessToken: string
+  expiresAt: string
+  rememberMe: boolean
+}
+
+export interface LoginCredentials {
+  email: string
+  password: string
+  rememberMe?: boolean
+}
+
+export interface LoginResult {
+  session: AuthSession
+}
+
+export type AuthErrorCode =
+  | 'INVALID_CREDENTIALS'
+  | 'SESSION_EXPIRED'
+  | 'UNAUTHORIZED'
+  | 'NETWORK_ERROR'
+  | 'UNEXPECTED'

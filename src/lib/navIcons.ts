@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Settings,
   Shield,
+  UserRound,
   Users,
   Wallet,
   type LucideIcon,
@@ -27,6 +28,7 @@ const iconMap: Record<string, LucideIcon> = {
   Bell,
   Shield,
   Settings,
+  UserRound,
 }
 
 export function getNavIcon(name: string): LucideIcon {

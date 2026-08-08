@@ -1,6 +1,9 @@
+import { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
 import { APP_NAME, APP_SHORT_NAME, NAVIGATION_ITEMS } from '@/constants'
+import { ROLES } from '@/constants/roles'
+import { useAuth } from '@/contexts/AuthContext'
 import { useSidebar } from '@/contexts/SidebarContext'
 import { getNavIcon } from '@/lib/navIcons'
 import { cn } from '@/utils/cn'
@@ -26,10 +29,24 @@ function BrandMark({ collapsed }: { collapsed: boolean }) {
 }
 
 function NavItems({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+  const { hasPermission, hasRole } = useAuth()
+  const isEmployeeUser = hasRole(ROLES.EMPLOYEE)
+
+  const visibleItems = useMemo(
+    () =>
+      NAVIGATION_ITEMS.filter((item) => {
+        if (!item.requiredPermission) return true
+        return hasPermission(item.requiredPermission)
+      }),
+    [hasPermission],
+  )
+
   return (
     <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4 scrollbar-thin" aria-label="Main">
-      {NAVIGATION_ITEMS.map((item) => {
+      {visibleItems.map((item) => {
         const Icon = getNavIcon(item.icon)
+        const label =
+          isEmployeeUser && item.selfServiceLabel ? item.selfServiceLabel : item.label
 
         const link = (
           <NavLink
@@ -46,13 +63,13 @@ function NavItems({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: 
             }
           >
             <Icon className="h-5 w-5 shrink-0" aria-hidden />
-            {!collapsed ? <span>{item.label}</span> : <span className="sr-only">{item.label}</span>}
+            {!collapsed ? <span>{label}</span> : <span className="sr-only">{label}</span>}
           </NavLink>
         )
 
         if (collapsed) {
           return (
-            <Tooltip key={item.id} content={item.label} side="bottom">
+            <Tooltip key={item.id} content={label} side="bottom">
               {link}
             </Tooltip>
           )

@@ -14,6 +14,9 @@ export const companyDefaults: CompanySettings = {
 
 export const routes = {
   login: '/login',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  changePassword: '/change-password',
   dashboard: '/dashboard',
   employees: '/employees',
   departments: '/departments',
@@ -27,4 +30,5 @@ export const routes = {
   users: '/users',
   settings: '/settings',
   profile: '/profile',
+  accessDenied: '/403',
 } as const

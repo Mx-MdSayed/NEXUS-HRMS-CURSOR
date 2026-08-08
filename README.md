@@ -6,6 +6,7 @@ Professional Basic-to-Mid-Level Human Resource Management System.
 
 - **Module 1** — Foundation & architecture (complete)
 - **Module 2** — Design system & reusable UI components (complete)
+- **Module 3** — Authentication & RBAC (complete)
 
 ## Getting started
 
@@ -14,17 +15,23 @@ npm install
 npm run dev
 ```
 
-## Scripts
+## Development auth accounts (mock only)
 
-- `npm run dev` — start development server
-- `npm run build` — typecheck and production build
-- `npm run preview` — preview production build
-- `npm run lint` — run oxlint
+| Role | Email | Password |
+| --- | --- | --- |
+| Super Admin | `admin@example.com` | `Password123!` |
+| HR Admin | `hr@example.com` | `Password123!` |
+| Employee | `employee@example.com` | `Password123!` |
+
+These credentials exist only in the development mock auth adapter and must never be used in production.
+
+## Auth routes
+
+- `/login`
+- `/forgot-password`
+- `/reset-password`
+- `/change-password`
 
 ## UI Preview
 
-Internal design system showcase (not in main navigation):
-
-```text
-/ui-preview
-```
+Internal design system showcase (not in main navigation): `/ui-preview`
