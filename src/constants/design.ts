@@ -21,14 +21,20 @@ export const radiusTokens = {
   sm: 'var(--hrms-radius-sm)',
   md: 'var(--hrms-radius-md)',
   lg: 'var(--hrms-radius-lg)',
+  /** Standard control radius — inputs, buttons, badges */
+  control: 'var(--hrms-radius-md)',
+  /** Cards and panels */
+  panel: 'var(--hrms-radius-lg)',
 } as const
 
 export const shadowTokens = {
+  none: 'none',
   sm: 'var(--hrms-shadow-sm)',
   md: 'var(--hrms-shadow-md)',
   lg: 'var(--hrms-shadow-lg)',
 } as const
 
+/** Spacing scale in pixels — align with Tailwind spacing utilities. */
 export const spacingScale = {
   xs: 4,
   sm: 8,
@@ -36,4 +42,18 @@ export const spacingScale = {
   lg: 16,
   xl: 24,
   '2xl': 32,
+  page: 24,
+  section: 24,
+  card: 20,
+  form: 16,
+} as const
+
+export const typographyScale = {
+  pageTitle: 'text-page-title',
+  sectionTitle: 'text-section-title',
+  cardTitle: 'text-card-title',
+  body: 'text-body',
+  small: 'text-small',
+  label: 'text-label',
+  helper: 'text-helper',
 } as const

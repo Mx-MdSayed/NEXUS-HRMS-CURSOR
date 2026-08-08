@@ -4,8 +4,15 @@ import { cn } from '@/utils/cn'
 export interface TooltipProps {
   content: string
   children: ReactNode
-  side?: 'top' | 'bottom'
+  side?: 'top' | 'bottom' | 'left' | 'right'
   className?: string
+}
+
+const sideClasses: Record<NonNullable<TooltipProps['side']>, string> = {
+  top: 'bottom-full left-1/2 mb-2 -translate-x-1/2',
+  bottom: 'top-full left-1/2 mt-2 -translate-x-1/2',
+  left: 'right-full top-1/2 mr-2 -translate-y-1/2',
+  right: 'left-full top-1/2 ml-2 -translate-y-1/2',
 }
 
 export function Tooltip({ content, children, side = 'top', className }: TooltipProps) {
@@ -24,9 +31,9 @@ export function Tooltip({ content, children, side = 'top', className }: TooltipP
         <span
           role="tooltip"
           className={cn(
-            'pointer-events-none absolute left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-md bg-surface-900 px-2 py-1 text-xs text-white shadow-card',
+            'pointer-events-none absolute z-50 whitespace-nowrap rounded-md bg-surface-900 px-2 py-1 text-xs text-white shadow-card',
             'dark:bg-surface-100 dark:text-surface-900',
-            side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
+            sideClasses[side],
           )}
         >
           {content}

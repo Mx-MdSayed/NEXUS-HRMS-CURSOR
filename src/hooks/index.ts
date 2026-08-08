@@ -1,3 +1,6 @@
 export { useMediaQuery } from './useMediaQuery'
+export { useDocumentTitle } from './useDocumentTitle'
+export { useRouteMeta } from './useRouteMeta'
+export { useUnsavedChangesWarning } from './useUnsavedChangesWarning'
 export { useSidebar } from '@/contexts/SidebarContext'
 export { useTheme } from '@/contexts/ThemeContext'

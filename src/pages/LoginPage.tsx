@@ -5,11 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { AuthLayout } from '@/components/layouts/AuthLayout'
 import { PasswordInput } from '@/components/forms/PasswordInput'
 import { Button, Checkbox, Input } from '@/components/ui'
-import {
-  DEV_AUTH_ACCOUNTS,
-  getAuthErrorMessage,
-  getRememberedEmail,
-} from '@/services/auth'
+import { getAuthErrorMessage, getRememberedEmail } from '@/services/auth'
 import { showError, showSuccess } from '@/utils/toast'
 
 interface LoginFormValues {
@@ -54,28 +50,21 @@ export function LoginPage() {
   return (
     <AuthLayout
       title="Sign in"
-      description="Access your HRMS workspace securely."
-      footer={
-        <div className="space-y-3 text-center text-xs text-surface-500 dark:text-surface-400">
-          <p>
-            Development accounts: {DEV_AUTH_ACCOUNTS.map((account) => account.email).join(' · ')}
-          </p>
-          <p>Use the development password configured for local mock authentication.</p>
-        </div>
-      }
+      description="Enter your credentials to access the HRMS workspace."
     >
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
         <Input
           label="Email"
           type="email"
           autoComplete="email"
+          placeholder="you@company.com"
           requiredMark
           error={errors.email?.message}
           {...register('email', {
-            required: 'Email is required',
+            required: 'Email address is required.',
             pattern: {
               value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: 'Enter a valid email address',
+              message: 'Enter a valid email address.',
             },
           })}
         />
@@ -86,10 +75,10 @@ export function LoginPage() {
           requiredMark
           error={errors.password?.message}
           {...register('password', {
-            required: 'Password is required',
+            required: 'Password is required.',
             minLength: {
               value: MIN_PASSWORD_LENGTH,
-              message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+              message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
             },
           })}
         />
@@ -104,8 +93,8 @@ export function LoginPage() {
           </Link>
         </div>
 
-        <Button type="submit" className="w-full" isLoading={isSubmitting}>
-          Login
+        <Button type="submit" className="w-full" isLoading={isSubmitting} loadingLabel="Signing in…">
+          Sign in
         </Button>
       </form>
     </AuthLayout>

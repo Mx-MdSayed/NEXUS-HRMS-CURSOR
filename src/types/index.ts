@@ -171,6 +171,14 @@ export interface User {
   deletedBy?: string
 }
 
+export type NavigationGroupId =
+  | 'main'
+  | 'people'
+  | 'payroll'
+  | 'management'
+  | 'system'
+  | 'account'
+
 export interface NavigationItem {
   id: string
   label: string
@@ -180,6 +188,8 @@ export interface NavigationItem {
   selfServicePath?: string
   path: string
   icon: string
+  /** Sidebar section grouping (admin navigation). */
+  group?: NavigationGroupId
   module?: string
   requiredPermission?: PermissionName | PermissionName[]
 }

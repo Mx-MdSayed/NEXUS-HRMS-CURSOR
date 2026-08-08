@@ -31,6 +31,8 @@ export function ConfirmDialog({
       title={title}
       description={description}
       size="sm"
+      closeOnBackdrop={tone !== 'danger'}
+      closeOnEscape={tone !== 'danger'}
       footer={
         <>
           <Button variant="secondary" onClick={onClose} disabled={isLoading}>
@@ -46,9 +48,13 @@ export function ConfirmDialog({
         </>
       }
     >
-      <p className="text-sm text-surface-600 dark:text-surface-300">
-        Please confirm that you want to continue.
-      </p>
+      {description ? (
+        <p className="text-sm text-surface-600 dark:text-surface-300">{description}</p>
+      ) : (
+        <p className="text-sm text-surface-600 dark:text-surface-300">
+          Please confirm that you want to continue.
+        </p>
+      )}
     </Modal>
   )
 }
