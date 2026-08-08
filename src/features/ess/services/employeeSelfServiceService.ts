@@ -79,6 +79,7 @@ function statusToRequestStatus(status: string): EssRequest['status'] {
   if (status === 'rejected') return 'rejected'
   if (status === 'cancelled') return 'cancelled'
   if (status === 'withdrawn') return 'withdrawn'
+  if (status === 'under_review' || status === 'processing') return 'under_review'
   return 'pending'
 }
 

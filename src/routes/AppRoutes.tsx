@@ -531,7 +531,9 @@ export function AppRoutes() {
         <Route
           path="salary/structures"
           element={
-            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+            <PermissionRoute
+              permission={[PERMISSIONS.SALARY_MANAGE, PERMISSIONS.SALARY_CREATE, PERMISSIONS.SALARY_EDIT]}
+            >
               <SalaryStructuresPage />
             </PermissionRoute>
           }
@@ -555,7 +557,9 @@ export function AppRoutes() {
         <Route
           path="salary/structures/:id"
           element={
-            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+            <PermissionRoute
+              permission={[PERMISSIONS.SALARY_MANAGE, PERMISSIONS.SALARY_CREATE, PERMISSIONS.SALARY_EDIT]}
+            >
               <SalaryStructureDetailPage />
             </PermissionRoute>
           }
@@ -563,7 +567,9 @@ export function AppRoutes() {
         <Route
           path="salary/assignments"
           element={
-            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+            <PermissionRoute
+              permission={[PERMISSIONS.SALARY_MANAGE, PERMISSIONS.SALARY_ASSIGN]}
+            >
               <SalaryAssignmentsPage />
             </PermissionRoute>
           }
@@ -579,7 +585,9 @@ export function AppRoutes() {
         <Route
           path="salary/revisions"
           element={
-            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+            <PermissionRoute
+              permission={[PERMISSIONS.SALARY_MANAGE, PERMISSIONS.SALARY_REVISE, PERMISSIONS.SALARY_ASSIGN]}
+            >
               <SalaryRevisionsPage />
             </PermissionRoute>
           }

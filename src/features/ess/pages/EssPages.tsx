@@ -54,10 +54,21 @@ import type {
   EssNotification,
   EssProfileData,
   EssRequest,
+  EssRequestStatus,
   EssSalaryData,
   ProfileChangeRequest,
 } from '../types'
 import { getEssErrorMessage } from '../utils/errors'
+import type { StatusTone } from '@/components/ui'
+
+function requestStatusTone(status: EssRequestStatus): StatusTone {
+  if (status === 'under_review') return 'processing'
+  if (status === 'withdrawn') return 'withdrawn'
+  if (status === 'cancelled') return 'cancelled'
+  if (status === 'approved') return 'approved'
+  if (status === 'rejected') return 'rejected'
+  return 'pending'
+}
 
 type ResourceState<T> = {
   data: T | null
@@ -131,7 +142,14 @@ export function EssDashboardPage() {
               <div className="flex items-center gap-4">
                 <Avatar name={data.welcomeName} src={data.photo} size="lg" />
                 <div>
-                  <p className="text-sm text-surface-500 dark:text-surface-400">Welcome back,</p>
+                  <p className="text-sm text-surface-500 dark:text-surface-400">
+                    {(() => {
+                      const hour = new Date().getHours()
+                      if (hour < 12) return 'Good morning,'
+                      if (hour < 17) return 'Good afternoon,'
+                      return 'Good evening,'
+                    })()}
+                  </p>
                   <h2 className="font-display text-2xl font-semibold text-surface-900 dark:text-surface-50">
                     {data.welcomeName}
                   </h2>
@@ -367,7 +385,9 @@ function ProfileChangeRequests({ rows }: { rows: ProfileChangeRequest[] }) {
           <TableRow key={row.id}>
             <TableCell>{row.field}</TableCell>
             <TableCell>{row.requestedValue}</TableCell>
-            <TableCell><StatusBadge status={row.status} /></TableCell>
+            <TableCell>
+              <StatusBadge status={requestStatusTone(row.status)} label={row.status.replaceAll('_', ' ')} />
+            </TableCell>
             <TableCell>{formatDate(row.requestedAt)}</TableCell>
           </TableRow>
         ))}
@@ -897,7 +917,9 @@ export function EssRequestsPage() {
               <TableRow key={row.id}>
                 <TableCell>{row.title}<p className="text-xs text-surface-500">{row.description}</p></TableCell>
                 <TableCell>{row.type.replaceAll('_', ' ')}</TableCell>
-                <TableCell><StatusBadge status={row.status} /></TableCell>
+                <TableCell>
+                  <StatusBadge status={requestStatusTone(row.status)} label={row.status.replaceAll('_', ' ')} />
+                </TableCell>
                 <TableCell>{formatDate(row.createdAt)}</TableCell>
                 <TableCell><Link to={`/employee/requests/${row.id}`}><Button variant="ghost" size="sm">View</Button></Link></TableCell>
               </TableRow>

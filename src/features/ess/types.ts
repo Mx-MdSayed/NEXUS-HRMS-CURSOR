@@ -16,7 +16,13 @@ import type { Payslip } from '@/features/payslip/types'
 import type { EmployeeSalary } from '@/features/salary/types'
 
 export type EssRequestType = 'attendance_correction' | 'profile_change' | 'leave' | 'document' | 'other'
-export type EssRequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'withdrawn'
+export type EssRequestStatus =
+  | 'pending'
+  | 'under_review'
+  | 'approved'
+  | 'rejected'
+  | 'cancelled'
+  | 'withdrawn'
 export type EssNotificationType = 'leave' | 'payslip' | 'attendance' | 'hr' | 'profile' | 'system'
 export type EmployeeDocumentCategory = 'employment' | 'identity' | 'salary' | 'policy' | 'other'
 
