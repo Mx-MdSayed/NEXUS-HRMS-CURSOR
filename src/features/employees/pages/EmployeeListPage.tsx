@@ -29,12 +29,13 @@ import {
   TableRow,
 } from '@/components/ui'
 import { PERMISSIONS } from '@/constants/permissions'
+import { ROLES } from '@/constants/roles'
 import { DEFAULT_PAGE_SIZE } from '@/constants/app'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatDate } from '@/utils/date'
 import { showError, showSuccess } from '@/utils/toast'
 import { EMPLOYMENT_STATUS_OPTIONS, EMPLOYMENT_TYPE_LABELS, EMPLOYMENT_TYPE_OPTIONS } from '../constants'
-import { employeeService } from '../services/employeeService'
+import { employeeService, isProtectedSuperAdminEmployee } from '../services/employeeService'
 import type { EmployeeFilters, EmployeeListItem } from '../types'
 import { getEmployeeErrorMessage } from '../utils/errors'
 
@@ -54,13 +55,15 @@ const defaultFilters: EmployeeFilters = {
 
 export function EmployeeListPage() {
   const navigate = useNavigate()
-  const { user, hasPermission } = useAuth()
+  const { user, hasPermission, hasRole } = useAuth()
   const actorName = user?.name ?? 'System'
+  const actorRole = user?.role
 
   const canCreate = hasPermission(PERMISSIONS.EMPLOYEE_CREATE)
   const canEdit = hasPermission(PERMISSIONS.EMPLOYEE_EDIT)
   const canDelete = hasPermission(PERMISSIONS.EMPLOYEE_DELETE)
   const canManage = hasPermission(PERMISSIONS.EMPLOYEE_MANAGE)
+  const isHrAdmin = hasRole(ROLES.HR_ADMIN)
 
   const [rows, setRows] = useState<EmployeeListItem[]>([])
   const [totalPages, setTotalPages] = useState(1)
@@ -172,8 +175,9 @@ export function EmployeeListPage() {
         cell: ({ row }) => {
           const employee = row.original
           const isActive = employee.employmentStatus === 'active'
+          const protectedTarget = isHrAdmin && isProtectedSuperAdminEmployee(employee)
           const moreItems = [
-            ...(canManage
+            ...(canManage && !protectedTarget
               ? [
                   {
                     id: 'toggle-status',
@@ -182,7 +186,7 @@ export function EmployeeListPage() {
                   },
                 ]
               : []),
-            ...(canDelete
+            ...(canDelete && !protectedTarget
               ? [
                   {
                     id: 'delete',
@@ -197,14 +201,18 @@ export function EmployeeListPage() {
           return (
             <TableActions
               onView={() => navigate(`/employees/${employee.id}`)}
-              onEdit={canEdit ? () => navigate(`/employees/${employee.id}/edit`) : undefined}
+              onEdit={
+                canEdit && !protectedTarget
+                  ? () => navigate(`/employees/${employee.id}/edit`)
+                  : undefined
+              }
               moreItems={moreItems}
             />
           )
         },
       }),
     ],
-    [canDelete, canEdit, canManage, navigate],
+    [canDelete, canEdit, canManage, isHrAdmin, navigate],
   )
 
   const table = useLegacyTable({
@@ -439,7 +447,7 @@ export function EmployeeListPage() {
           if (!pendingDelete) return
           setActionLoading(true)
           void employeeService
-            .deleteEmployee(pendingDelete.id, actorName)
+            .deleteEmployee(pendingDelete.id, actorName, actorRole)
             .then(() => {
               showSuccess('Employee deleted successfully.')
               setPendingDelete(null)
@@ -473,8 +481,8 @@ export function EmployeeListPage() {
           const isActive = pendingStatus.employmentStatus === 'active'
           setActionLoading(true)
           const action = isActive
-            ? employeeService.deactivateEmployee(pendingStatus.id, actorName)
-            : employeeService.activateEmployee(pendingStatus.id, actorName)
+            ? employeeService.deactivateEmployee(pendingStatus.id, actorName, actorRole)
+            : employeeService.activateEmployee(pendingStatus.id, actorName, actorRole)
           void action
             .then(() => {
               showSuccess(

@@ -35,7 +35,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { formatDate, formatRelativeDate } from '@/utils/date'
 import { showError, showInfo, showSuccess } from '@/utils/toast'
 import { DOCUMENT_CATEGORY_LABELS, DOCUMENT_CATEGORY_OPTIONS } from '../constants'
-import { employeeService } from '../services/employeeService'
+import { employeeService, isProtectedSuperAdminEmployee } from '../services/employeeService'
 import type { DocumentCategory, Employee, EmployeeListItem } from '../types'
 import { formatBytes, maskSensitiveValue } from '../utils/format'
 import { getEmployeeErrorMessage } from '../utils/errors'
@@ -93,7 +93,13 @@ export function EmployeeProfilePage() {
   }, [id])
 
   const actorName = user?.name ?? 'System'
+  const actorRole = user?.role
   const isActive = employee?.employmentStatus === 'active'
+  const protectedTarget =
+    Boolean(employee) && hasRole(ROLES.HR_ADMIN) && isProtectedSuperAdminEmployee(employee!)
+  const showEdit = canEdit && !protectedTarget
+  const showManage = canManage && !protectedTarget
+  const showDelete = canDelete && !protectedTarget
 
   const kycDisplay = useMemo(() => {
     if (!employee) return []
@@ -158,17 +164,17 @@ export function EmployeeProfilePage() {
         ]}
         actions={
           <div className="flex flex-wrap gap-2">
-            {canEdit ? (
+            {showEdit ? (
               <Button variant="outline" onClick={() => navigate(`/employees/${employee.id}/edit`)}>
                 Edit
               </Button>
             ) : null}
-            {canManage ? (
+            {showManage ? (
               <Button variant="secondary" onClick={() => setPendingStatus(true)}>
                 {isActive ? 'Deactivate' : 'Activate'}
               </Button>
             ) : null}
-            {canDelete ? (
+            {showDelete ? (
               <Button variant="danger" onClick={() => setPendingDelete(true)}>
                 Delete
               </Button>
@@ -265,7 +271,7 @@ export function EmployeeProfilePage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-3">
               <CardTitle>Personal & Contact</CardTitle>
-              {canEdit ? (
+              {showEdit ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -380,7 +386,7 @@ export function EmployeeProfilePage() {
 
         <TabsContent value="documents">
           <div className="space-y-4">
-            {canEdit ? (
+            {showEdit ? (
               <Card>
                 <CardHeader>
                   <CardTitle>Upload Document</CardTitle>
@@ -462,7 +468,7 @@ export function EmployeeProfilePage() {
                             else showInfo('Document preview will be available with storage integration.')
                           }}
                           onDelete={
-                            canEdit
+                            showEdit
                               ? () => {
                                   void employeeService
                                     .deleteEmployeeDocument(employee.id, doc.id, actorName)
@@ -526,7 +532,7 @@ export function EmployeeProfilePage() {
         onConfirm={() => {
           setActionLoading(true)
           void employeeService
-            .softDeleteEmployee(employee.id, actorName)
+            .softDeleteEmployee(employee.id, actorName, actorRole)
             .then(() => {
               showSuccess('Employee deleted successfully.')
               navigate('/employees')
@@ -551,8 +557,8 @@ export function EmployeeProfilePage() {
         onConfirm={() => {
           setActionLoading(true)
           const action = isActive
-            ? employeeService.deactivateEmployee(employee.id, actorName)
-            : employeeService.activateEmployee(employee.id, actorName)
+            ? employeeService.deactivateEmployee(employee.id, actorName, actorRole)
+            : employeeService.activateEmployee(employee.id, actorName, actorRole)
           void action
             .then((updated) => {
               setEmployee(updated)

@@ -1,4 +1,6 @@
 import { DEFAULT_PAGE_SIZE } from '@/constants/app'
+import { ROLES } from '@/constants/roles'
+import { DEV_AUTH_ACCOUNTS } from '@/services/auth/devAuthConfig'
 import { buildFullName } from '../utils/format'
 import { initialEmployees } from '../data/mockEmployees'
 import { mockDepartments, mockDesignations } from '../data/mockOrg'
@@ -31,6 +33,27 @@ export class EmployeeServiceError extends Error {
     super(message)
     this.name = 'EmployeeServiceError'
     this.code = code
+  }
+}
+
+export function isProtectedSuperAdminEmployee(employee: {
+  email: string
+  employeeCode: string
+}): boolean {
+  return DEV_AUTH_ACCOUNTS.some(
+    (account) =>
+      account.role === ROLES.SUPER_ADMIN &&
+      (account.email.toLowerCase() === employee.email.toLowerCase() ||
+        account.employeeId === employee.employeeCode),
+  )
+}
+
+function assertCanManageTarget(employee: Employee, actorRole?: string) {
+  if (actorRole === ROLES.HR_ADMIN && isProtectedSuperAdminEmployee(employee)) {
+    throw new EmployeeServiceError(
+      'UNAUTHORIZED',
+      'HR Admin cannot manage Super Admin employee records.',
+    )
   }
 }
 
@@ -285,27 +308,30 @@ export const employeeService = {
     id: string,
     values: EmployeeFormValues,
     actorName = 'System',
+    actorRole?: string,
   ): Promise<Employee> {
     await delay()
     const index = employeesDb.findIndex((item) => item.id === id && !item.isDeleted)
     if (index < 0) throw new EmployeeServiceError('NOT_FOUND', 'Employee not found.')
 
+    const existing = employeesDb[index]
+    assertCanManageTarget(existing, actorRole)
     validateUniqueness(values, id)
     if (values.reportingManagerId === id) {
       throw new EmployeeServiceError('VALIDATION', 'An employee cannot be their own reporting manager.')
     }
 
-    const existing = employeesDb[index]
     const updated = formToEmployee(values, existing, actorName)
     pushActivity(updated, 'updated', 'Employee profile updated', actorName)
     employeesDb[index] = updated
     return structuredClone(updated)
   },
 
-  async softDeleteEmployee(id: string, actorName = 'System'): Promise<void> {
+  async softDeleteEmployee(id: string, actorName = 'System', actorRole?: string): Promise<void> {
     await delay()
     const employee = employeesDb.find((item) => item.id === id && !item.isDeleted)
     if (!employee) throw new EmployeeServiceError('NOT_FOUND', 'Employee not found.')
+    assertCanManageTarget(employee, actorRole)
     employee.isDeleted = true
     employee.deletedAt = new Date().toISOString()
     employee.deletedBy = actorName
@@ -315,8 +341,8 @@ export const employeeService = {
   },
 
   /** Soft-delete alias used by list/profile actions. */
-  async deleteEmployee(id: string, actorName = 'System'): Promise<void> {
-    return this.softDeleteEmployee(id, actorName)
+  async deleteEmployee(id: string, actorName = 'System', actorRole?: string): Promise<void> {
+    return this.softDeleteEmployee(id, actorName, actorRole)
   },
 
   async updateOwnPersonalInfo(
@@ -380,10 +406,11 @@ export const employeeService = {
     return structuredClone(updated)
   },
 
-  async activateEmployee(id: string, actorName = 'System'): Promise<Employee> {
+  async activateEmployee(id: string, actorName = 'System', actorRole?: string): Promise<Employee> {
     await delay()
     const employee = employeesDb.find((item) => item.id === id && !item.isDeleted)
     if (!employee) throw new EmployeeServiceError('NOT_FOUND', 'Employee not found.')
+    assertCanManageTarget(employee, actorRole)
     employee.employmentStatus = 'active'
     employee.updatedAt = new Date().toISOString()
     employee.updatedBy = actorName
@@ -391,10 +418,11 @@ export const employeeService = {
     return structuredClone(employee)
   },
 
-  async deactivateEmployee(id: string, actorName = 'System'): Promise<Employee> {
+  async deactivateEmployee(id: string, actorName = 'System', actorRole?: string): Promise<Employee> {
     await delay()
     const employee = employeesDb.find((item) => item.id === id && !item.isDeleted)
     if (!employee) throw new EmployeeServiceError('NOT_FOUND', 'Employee not found.')
+    assertCanManageTarget(employee, actorRole)
     employee.employmentStatus = 'inactive'
     employee.updatedAt = new Date().toISOString()
     employee.updatedBy = actorName

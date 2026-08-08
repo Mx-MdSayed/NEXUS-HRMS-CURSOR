@@ -35,7 +35,7 @@ export {
   MAX_DOCUMENT_SIZE_BYTES,
 } from './constants'
 
-export { employeeService, EmployeeServiceError } from './services/employeeService'
+export { employeeService, EmployeeServiceError, isProtectedSuperAdminEmployee } from './services/employeeService'
 export type { EmployeeService } from './services/employeeService'
 
 export { EmployeeDirectoryGuard } from './components/EmployeeDirectoryGuard'
