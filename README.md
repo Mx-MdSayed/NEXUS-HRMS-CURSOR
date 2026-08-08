@@ -7,6 +7,7 @@ Professional Basic-to-Mid-Level Human Resource Management System.
 - **Module 1** — Foundation & architecture (complete)
 - **Module 2** — Design system & reusable UI components (complete)
 - **Module 3** — Authentication & RBAC (complete)
+- **Module 4** — Dashboard & core overview (complete)
 
 ## Getting started
 
@@ -31,6 +32,15 @@ These credentials exist only in the development mock auth adapter and must never
 - `/forgot-password`
 - `/reset-password`
 - `/change-password`
+
+## Dashboard
+
+Role-aware dashboard at `/dashboard`:
+
+- Admin / HR Admin → organization overview (KPIs, charts, leave, payroll summary)
+- Employee → personal HR overview only
+
+Dashboard data currently comes from a mock `dashboardService` and is ready to swap for real APIs later.
 
 ## UI Preview
 

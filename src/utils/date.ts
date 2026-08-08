@@ -25,3 +25,7 @@ export function formatRelativeDate(value: Date | string | number): string {
   if (!date) return '—'
   return formatDistanceToNow(date, { addSuffix: true })
 }
+
+export function formatDateTime(value: Date | string | number): string {
+  return formatDate(value, "dd MMM yyyy, hh:mm a")
+}
