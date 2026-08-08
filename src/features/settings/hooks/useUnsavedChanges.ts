@@ -1,19 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useBlocker } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
 
-/** Detect dirty forms and confirm before leaving. */
+/**
+ * Detect dirty forms and warn before leaving.
+ * Uses beforeunload for browser navigation.
+ * In-app leave confirmation is exposed via requestLeave() for Cancel actions.
+ * (useBlocker requires a data router; this app uses BrowserRouter.)
+ */
 export function useUnsavedChanges(isDirty: boolean) {
   const [pendingConfirm, setPendingConfirm] = useState(false)
-  const proceedRef = useRef<null | (() => void)>(null)
-
-  const blocker = useBlocker(isDirty)
-
-  useEffect(() => {
-    if (blocker.state === 'blocked') {
-      setPendingConfirm(true)
-      proceedRef.current = () => blocker.proceed()
-    }
-  }, [blocker])
+  const [leaveAction, setLeaveAction] = useState<null | (() => void)>(null)
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -25,17 +20,29 @@ export function useUnsavedChanges(isDirty: boolean) {
     return () => window.removeEventListener('beforeunload', onBeforeUnload)
   }, [isDirty])
 
+  const requestLeave = useCallback(
+    (action?: () => void) => {
+      if (!isDirty) {
+        action?.()
+        return
+      }
+      setLeaveAction(() => action ?? null)
+      setPendingConfirm(true)
+    },
+    [isDirty],
+  )
+
   const confirmLeave = useCallback(() => {
     setPendingConfirm(false)
-    proceedRef.current?.()
-    proceedRef.current = null
-  }, [])
+    const action = leaveAction
+    setLeaveAction(null)
+    action?.()
+  }, [leaveAction])
 
   const cancelLeave = useCallback(() => {
     setPendingConfirm(false)
-    proceedRef.current = null
-    if (blocker.state === 'blocked') blocker.reset()
-  }, [blocker])
+    setLeaveAction(null)
+  }, [])
 
-  return { pendingConfirm, confirmLeave, cancelLeave }
+  return { pendingConfirm, confirmLeave, cancelLeave, requestLeave, isDirty }
 }

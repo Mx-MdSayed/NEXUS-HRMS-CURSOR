@@ -18,6 +18,7 @@ export type SecurityEventType =
   | 'ACCOUNT_SUSPENDED'
   | 'ROLE_CHANGED'
   | 'PERMISSION_CHANGED'
+  | 'SETTINGS_CHANGED'
   | 'SESSION_SIGNED_OUT'
 
 export interface PermissionDefinition {

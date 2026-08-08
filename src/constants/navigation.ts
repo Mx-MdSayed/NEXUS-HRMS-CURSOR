@@ -144,7 +144,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Settings',
     path: '/settings',
     icon: 'Settings',
-    module: 'Later module',
+    module: 'Module 16',
     requiredPermission: PERMISSIONS.SETTINGS_VIEW,
   },
   {

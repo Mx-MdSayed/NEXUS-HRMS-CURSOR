@@ -104,6 +104,19 @@ export type PermissionName =
   | 'security.manage'
   | 'settings.view'
   | 'settings.manage'
+  | 'company.manage'
+  | 'organization.manage'
+  | 'location.manage'
+  | 'schedule.manage'
+  | 'holiday.manage'
+  | 'leave-policy.manage'
+  | 'attendance-settings.manage'
+  | 'payroll-settings.manage'
+  | 'payslip-settings.manage'
+  | 'localization.manage'
+  | 'branding.manage'
+  | 'notification-settings.manage'
+  | 'workflow-settings.manage'
   | 'ess.view'
 
 export type EmploymentStatus =
@@ -182,8 +195,22 @@ export interface Notification {
 }
 
 export interface CompanySettings {
+  companyId: string
   companyName: string
   legalName?: string
+  registrationNumber?: string
+  taxId?: string
+  email?: string
+  hrEmail?: string
+  supportEmail?: string
+  phone?: string
+  website?: string
+  addressLine1?: string
+  addressLine2?: string
+  city?: string
+  state?: string
+  country?: string
+  postalCode?: string
   logoUrl?: string
   timezone: string
   dateFormat: string
@@ -191,6 +218,10 @@ export interface CompanySettings {
   currencyLocale: string
   fiscalYearStartMonth: number
   workWeekStart: 0 | 1 | 2 | 3 | 4 | 5 | 6
+  status: 'active' | 'inactive'
+  employeeIdPrefix: string
+  employeeIdNextNumber: number
+  payslipPrefix: string
 }
 
 export interface AuthSession {

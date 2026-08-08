@@ -139,6 +139,19 @@ export const PERMISSION_CATALOG: PermissionDefinition[] = [
 
   def(PERMISSIONS.SETTINGS_VIEW, 'View Settings', 'Settings', 'view', 'View system settings'),
   def(PERMISSIONS.SETTINGS_MANAGE, 'Manage Settings', 'Settings', 'manage', 'Manage system settings'),
+  def(PERMISSIONS.COMPANY_MANAGE, 'Manage Company', 'Settings', 'manage', 'Manage company profile'),
+  def(PERMISSIONS.ORGANIZATION_MANAGE, 'Manage Organization', 'Settings', 'manage', 'Manage organization structure'),
+  def(PERMISSIONS.LOCATION_MANAGE, 'Manage Locations', 'Settings', 'manage', 'Manage office locations'),
+  def(PERMISSIONS.SCHEDULE_MANAGE, 'Manage Schedules', 'Settings', 'manage', 'Manage work schedules'),
+  def(PERMISSIONS.HOLIDAY_MANAGE, 'Manage Holidays', 'Settings', 'manage', 'Manage company holidays'),
+  def(PERMISSIONS.LEAVE_POLICY_MANAGE, 'Manage Leave Policies', 'Settings', 'manage', 'Manage leave policies'),
+  def(PERMISSIONS.ATTENDANCE_SETTINGS_MANAGE, 'Manage Attendance Settings', 'Settings', 'manage', 'Manage attendance settings'),
+  def(PERMISSIONS.PAYROLL_SETTINGS_MANAGE_GLOBAL, 'Manage Global Payroll Settings', 'Settings', 'manage', 'Manage centralized payroll settings'),
+  def(PERMISSIONS.PAYSLIP_SETTINGS_MANAGE, 'Manage Payslip Settings', 'Settings', 'manage', 'Manage payslip template settings'),
+  def(PERMISSIONS.LOCALIZATION_MANAGE, 'Manage Localization', 'Settings', 'manage', 'Manage locale, currency, and timezone'),
+  def(PERMISSIONS.BRANDING_MANAGE, 'Manage Branding', 'Settings', 'manage', 'Manage branding and logos'),
+  def(PERMISSIONS.NOTIFICATION_SETTINGS_MANAGE_GLOBAL, 'Manage Global Notification Settings', 'Settings', 'manage', 'Manage notification defaults'),
+  def(PERMISSIONS.WORKFLOW_SETTINGS_MANAGE, 'Manage Workflow Settings', 'Settings', 'manage', 'Manage workflow approver defaults'),
 
   def(PERMISSIONS.ESS_VIEW, 'Employee Self-Service', 'ESS', 'view', 'Access employee self-service portal'),
 ]

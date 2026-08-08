@@ -2,14 +2,32 @@ import type { CompanySettings } from '@/types'
 import { APP_NAME } from '@/constants/app'
 
 export const companyDefaults: CompanySettings = {
+  companyId: 'company_nexus_1',
   companyName: APP_NAME,
   legalName: 'Nexus Technologies Pvt. Ltd.',
+  registrationNumber: 'U72900KA2020PTC123456',
+  taxId: '29AABCN1234F1Z5',
+  email: 'hello@nexushrms.example',
+  hrEmail: 'hr@nexushrms.example',
+  supportEmail: 'support@nexushrms.example',
+  phone: '+91 80 4567 8900',
+  website: 'https://nexushrms.example',
+  addressLine1: '4th Floor, Nexus Tower',
+  addressLine2: 'Manyata Tech Park',
+  city: 'Bengaluru',
+  state: 'Karnataka',
+  country: 'India',
+  postalCode: '560045',
   timezone: 'Asia/Kolkata',
   dateFormat: 'dd MMM yyyy',
   currencyCode: 'INR',
   currencyLocale: 'en-IN',
   fiscalYearStartMonth: 4,
   workWeekStart: 1,
+  status: 'active',
+  employeeIdPrefix: 'EMP',
+  employeeIdNextNumber: 2300,
+  payslipPrefix: 'PS',
 }
 
 export const routes = {

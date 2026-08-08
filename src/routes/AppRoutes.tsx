@@ -130,8 +130,27 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { ProfilePage } from '@/pages/ProfilePage'
+import {
+  AttendanceSettingsPage,
+  BrandingSettingsPage,
+  CompanySettingsPage,
+  HolidaysSettingsPage,
+  LeavePoliciesSettingsPage,
+  LocalizationSettingsPage,
+  LocationsSettingsPage,
+  NotificationSettingsPage as SystemNotificationSettingsPage,
+  OrganizationSettingsPage,
+  PayrollSettingsConfigPage,
+  PayslipSettingsConfigPage,
+  SettingsAuditPage,
+  SettingsDashboardPage,
+  SettingsDepartmentsPage,
+  SettingsDesignationsPage,
+  SettingsLayout,
+  WorkSchedulesSettingsPage,
+  WorkflowSettingsPage,
+} from '@/features/settings'
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { UiPreviewPage } from '@/pages/UiPreviewPage'
 import { GuestRoute } from '@/routes/GuestRoute'
@@ -1034,14 +1053,168 @@ export function AppRoutes() {
           path="settings"
           element={
             <PermissionRoute permission={PERMISSIONS.SETTINGS_VIEW}>
-              <PlaceholderPage
-                title="Settings"
-                moduleLabel="Later module"
-                description="Company settings and preferences will be implemented in a later module."
-              />
+              <SettingsLayout />
             </PermissionRoute>
           }
-        />
+        >
+          <Route index element={<SettingsDashboardPage />} />
+          <Route
+            path="company"
+            element={
+              <PermissionRoute permission={[PERMISSIONS.SETTINGS_VIEW, PERMISSIONS.COMPANY_MANAGE]}>
+                <CompanySettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="organization"
+            element={
+              <PermissionRoute
+                permission={[PERMISSIONS.SETTINGS_VIEW, PERMISSIONS.ORGANIZATION_MANAGE]}
+              >
+                <OrganizationSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="departments"
+            element={
+              <PermissionRoute
+                permission={[PERMISSIONS.DEPARTMENT_VIEW, PERMISSIONS.DEPARTMENT_MANAGE]}
+              >
+                <SettingsDepartmentsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="designations"
+            element={
+              <PermissionRoute
+                permission={[PERMISSIONS.DESIGNATION_VIEW, PERMISSIONS.DESIGNATION_MANAGE]}
+              >
+                <SettingsDesignationsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="locations"
+            element={
+              <PermissionRoute permission={[PERMISSIONS.LOCATION_MANAGE, PERMISSIONS.SETTINGS_VIEW]}>
+                <LocationsSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="work-schedules"
+            element={
+              <PermissionRoute permission={[PERMISSIONS.SCHEDULE_MANAGE, PERMISSIONS.SETTINGS_VIEW]}>
+                <WorkSchedulesSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="holidays"
+            element={
+              <PermissionRoute permission={[PERMISSIONS.HOLIDAY_MANAGE, PERMISSIONS.SETTINGS_VIEW]}>
+                <HolidaysSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="leave-policies"
+            element={
+              <PermissionRoute
+                permission={[PERMISSIONS.LEAVE_POLICY_MANAGE, PERMISSIONS.SETTINGS_VIEW]}
+              >
+                <LeavePoliciesSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="attendance"
+            element={
+              <PermissionRoute
+                permission={[PERMISSIONS.ATTENDANCE_SETTINGS_MANAGE, PERMISSIONS.SETTINGS_VIEW]}
+              >
+                <AttendanceSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="payroll"
+            element={
+              <PermissionRoute
+                permission={[
+                  PERMISSIONS.PAYROLL_SETTINGS_MANAGE_GLOBAL,
+                  PERMISSIONS.PAYROLL_SETTINGS_MANAGE,
+                  PERMISSIONS.SETTINGS_VIEW,
+                ]}
+              >
+                <PayrollSettingsConfigPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="payslip"
+            element={
+              <PermissionRoute
+                permission={[PERMISSIONS.PAYSLIP_SETTINGS_MANAGE, PERMISSIONS.SETTINGS_VIEW]}
+              >
+                <PayslipSettingsConfigPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="localization"
+            element={
+              <PermissionRoute
+                permission={[PERMISSIONS.LOCALIZATION_MANAGE, PERMISSIONS.SETTINGS_VIEW]}
+              >
+                <LocalizationSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="notifications"
+            element={
+              <PermissionRoute
+                permission={[
+                  PERMISSIONS.NOTIFICATION_SETTINGS_MANAGE_GLOBAL,
+                  PERMISSIONS.NOTIFICATION_SETTINGS_MANAGE,
+                  PERMISSIONS.SETTINGS_VIEW,
+                ]}
+              >
+                <SystemNotificationSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="workflows"
+            element={
+              <PermissionRoute
+                permission={[PERMISSIONS.WORKFLOW_SETTINGS_MANAGE, PERMISSIONS.SETTINGS_VIEW]}
+              >
+                <WorkflowSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="branding"
+            element={
+              <PermissionRoute permission={[PERMISSIONS.BRANDING_MANAGE, PERMISSIONS.SETTINGS_VIEW]}>
+                <BrandingSettingsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="audit"
+            element={
+              <PermissionRoute permission={[PERMISSIONS.SETTINGS_VIEW, PERMISSIONS.SECURITY_VIEW]}>
+                <SettingsAuditPage />
+              </PermissionRoute>
+            }
+          />
+        </Route>
         <Route
           path="profile"
           element={

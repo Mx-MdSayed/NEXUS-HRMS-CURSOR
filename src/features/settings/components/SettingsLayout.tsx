@@ -97,7 +97,7 @@ export function SettingsLayout() {
                 className={cn(
                   'flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors',
                   active
-                    ? 'bg-brand-50 font-medium text-brand-800 dark:bg-brand-950/50 dark:text-brand-100'
+                    ? 'bg-primary-50 font-medium text-primary-800 dark:bg-primary-950/50 dark:text-primary-100'
                     : 'text-surface-700 hover:bg-surface-50 dark:text-surface-200 dark:hover:bg-surface-800',
                 )}
               >
