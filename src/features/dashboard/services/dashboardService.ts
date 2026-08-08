@@ -7,6 +7,7 @@ import { listActiveDepartmentOptions } from '@/features/organization/data/orgDb'
 import { attendanceService } from '@/features/attendance/services/attendanceService'
 import { leaveService } from '@/features/leave/services/leaveService'
 import { LEAVE_REQUEST_STATUSES } from '@/features/leave/constants'
+import { employeeSalaryService } from '@/features/salary/services/employeeSalaryService'
 import { format } from 'date-fns'
 
 function delay(ms = 500): Promise<void> {
@@ -164,6 +165,28 @@ export const dashboardService: DashboardService = {
       }
     } catch {
       // Keep mock leave summary if leave service is unavailable.
+    }
+
+    try {
+      const salaryOverview = await employeeSalaryService.getOverviewStats()
+      data.payrollSummary = {
+        ...data.payrollSummary,
+        periodLabel: 'Compensation snapshot (pre-payroll)',
+        totalPayroll: Math.round(salaryOverview.totalMonthlyGross),
+        paidAmount: 0,
+        pendingAmount: Math.round(salaryOverview.totalMonthlyGross),
+        employeesProcessed: 0,
+        totalEmployees: salaryOverview.employeesWithSalary,
+        status: 'draft',
+      }
+      const payrollAction = data.quickActions.find((item) => item.path === '/payroll')
+      if (payrollAction) {
+        payrollAction.path = '/salary'
+        payrollAction.label = 'Salary & Compensation'
+        payrollAction.description = 'Manage structures and assignments'
+      }
+    } catch {
+      // Keep mock payroll summary if salary service is unavailable.
     }
 
     return data

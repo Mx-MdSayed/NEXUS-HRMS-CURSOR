@@ -40,6 +40,9 @@ import type { DocumentCategory, Employee, EmployeeListItem } from '../types'
 import { formatBytes, maskSensitiveValue } from '../utils/format'
 import { getEmployeeErrorMessage } from '../utils/errors'
 import { EMPLOYMENT_TYPE_LABELS } from '../constants'
+import { formatSalaryAmount } from '@/features/salary/utils/money'
+import { employeeSalaryService } from '@/features/salary/services/employeeSalaryService'
+import type { EmployeeSalary } from '@/features/salary/types'
 
 export function EmployeeProfilePage() {
   const { id = '' } = useParams()
@@ -63,6 +66,13 @@ export function EmployeeProfilePage() {
   const canEdit = hasPermission(PERMISSIONS.EMPLOYEE_EDIT)
   const canDelete = hasPermission(PERMISSIONS.EMPLOYEE_DELETE)
   const canManage = hasPermission(PERMISSIONS.EMPLOYEE_MANAGE)
+  const canViewSalary =
+    hasPermission(PERMISSIONS.SALARY_VIEW) ||
+    hasPermission(PERMISSIONS.SALARY_MANAGE) ||
+    hasPermission(PERMISSIONS.SALARY_ASSIGN)
+
+  const [currentSalary, setCurrentSalary] = useState<EmployeeSalary | null>(null)
+  const [salaryLoading, setSalaryLoading] = useState(false)
 
   const loadEmployee = async () => {
     setIsLoading(true)
@@ -91,6 +101,26 @@ export function EmployeeProfilePage() {
   useEffect(() => {
     void loadEmployee()
   }, [id])
+
+  useEffect(() => {
+    if (!canViewSalary || !id) return
+    let cancelled = false
+    async function loadSalary() {
+      setSalaryLoading(true)
+      try {
+        const salary = await employeeSalaryService.getEmployeeSalary(id)
+        if (!cancelled) setCurrentSalary(salary)
+      } catch {
+        if (!cancelled) setCurrentSalary(null)
+      } finally {
+        if (!cancelled) setSalaryLoading(false)
+      }
+    }
+    void loadSalary()
+    return () => {
+      cancelled = true
+    }
+  }, [canViewSalary, id])
 
   const actorName = user?.name ?? 'System'
   const actorRole = user?.role
@@ -234,6 +264,7 @@ export function EmployeeProfilePage() {
           <TabsTrigger value="kyc">KYC</TabsTrigger>
           <TabsTrigger value="banking">Banking</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
+          {canViewSalary ? <TabsTrigger value="compensation">Compensation</TabsTrigger> : null}
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
 
@@ -493,6 +524,77 @@ export function EmployeeProfilePage() {
             )}
           </div>
         </TabsContent>
+
+        {canViewSalary ? (
+          <TabsContent value="compensation">
+            <Card>
+              <CardHeader>
+                <CardTitle>Compensation</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {salaryLoading ? (
+                  <p className="text-sm text-surface-500">Loading compensation…</p>
+                ) : !currentSalary ? (
+                  <EmptyState
+                    title="No salary assigned."
+                    description="Assign a salary structure from the Salary module."
+                    actionLabel={
+                      hasPermission(PERMISSIONS.SALARY_ASSIGN) ||
+                      hasPermission(PERMISSIONS.SALARY_MANAGE)
+                        ? 'Assign salary'
+                        : undefined
+                    }
+                    onAction={
+                      hasPermission(PERMISSIONS.SALARY_ASSIGN) ||
+                      hasPermission(PERMISSIONS.SALARY_MANAGE)
+                        ? () => navigate('/salary/assignments/new')
+                        : undefined
+                    }
+                  />
+                ) : (
+                  <>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <Info
+                        label="Monthly Gross"
+                        value={formatSalaryAmount(
+                          currentSalary.monthlyGross,
+                          currentSalary.currency,
+                        )}
+                      />
+                      <Info
+                        label="Annual Gross"
+                        value={formatSalaryAmount(
+                          currentSalary.annualGross,
+                          currentSalary.currency,
+                        )}
+                      />
+                      <Info
+                        label="Monthly CTC"
+                        value={formatSalaryAmount(
+                          currentSalary.monthlyCTC,
+                          currentSalary.currency,
+                        )}
+                      />
+                      <Info
+                        label="Annual CTC"
+                        value={formatSalaryAmount(
+                          currentSalary.annualCTC,
+                          currentSalary.currency,
+                        )}
+                      />
+                    </div>
+                    <Info label="Currency" value={currentSalary.currency} />
+                    <Info label="Structure" value={currentSalary.structureName} />
+                    <Info label="Effective From" value={formatDate(currentSalary.effectiveFrom)} />
+                    <Button variant="secondary" onClick={() => navigate(`/salary/${employee.id}`)}>
+                      View full compensation
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ) : null}
 
         <TabsContent value="activity">
           {employee.activity.length === 0 ? (

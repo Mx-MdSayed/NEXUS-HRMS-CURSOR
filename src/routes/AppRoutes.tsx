@@ -37,6 +37,18 @@ import {
   LeaveRequestsPage,
   LeaveTypesPage,
 } from '@/features/leave'
+import {
+  EmployeeSalaryPage,
+  SalaryAssignmentFormPage,
+  SalaryAssignmentsPage,
+  SalaryComponentFormPage,
+  SalaryComponentsPage,
+  SalaryIndexPage,
+  SalaryRevisionsPage,
+  SalaryStructureDetailPage,
+  SalaryStructureFormPage,
+  SalaryStructuresPage,
+} from '@/features/salary'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -315,13 +327,115 @@ export function AppRoutes() {
           }
         />
         <Route
+          path="salary"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+              <SalaryIndexPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/components"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.SALARY_COMPONENT_MANAGE, PERMISSIONS.SALARY_MANAGE]}
+            >
+              <SalaryComponentsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/components/new"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.SALARY_COMPONENT_MANAGE, PERMISSIONS.SALARY_MANAGE]}
+            >
+              <SalaryComponentFormPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/components/:id/edit"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.SALARY_COMPONENT_MANAGE, PERMISSIONS.SALARY_MANAGE]}
+            >
+              <SalaryComponentFormPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/structures"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+              <SalaryStructuresPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/structures/new"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.SALARY_CREATE, PERMISSIONS.SALARY_MANAGE]}>
+              <SalaryStructureFormPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/structures/:id/edit"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.SALARY_EDIT, PERMISSIONS.SALARY_MANAGE]}>
+              <SalaryStructureFormPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/structures/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+              <SalaryStructureDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/assignments"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+              <SalaryAssignmentsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/assignments/new"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.SALARY_ASSIGN, PERMISSIONS.SALARY_MANAGE]}>
+              <SalaryAssignmentFormPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/revisions"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+              <SalaryRevisionsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="salary/:employeeId"
+          element={
+            <PermissionRoute permission={PERMISSIONS.SALARY_VIEW}>
+              <EmployeeSalaryPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
           path="payroll"
           element={
             <PermissionRoute permission={PERMISSIONS.PAYROLL_VIEW}>
               <PlaceholderPage
                 title="Payroll"
                 moduleLabel="Later module"
-                description="Salary structures and payroll processing will be implemented in a later module."
+                description="Monthly payroll processing will be implemented in a later module. Salary structures are available under Salary."
               />
             </PermissionRoute>
           }
@@ -344,8 +458,8 @@ export function AppRoutes() {
             <PermissionRoute permission={PERMISSIONS.REPORTS_VIEW}>
               <PlaceholderPage
                 title="Reports"
-                moduleLabel="Module 9"
-                description="HR analytics and exportable reports will be implemented in Module 9."
+                moduleLabel="Later module"
+                description="HR analytics and exportable reports will be implemented in a later module."
               />
             </PermissionRoute>
           }

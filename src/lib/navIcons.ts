@@ -1,4 +1,5 @@
 import {
+  Banknote,
   BarChart3,
   Bell,
   BriefcaseBusiness,
@@ -23,6 +24,7 @@ const iconMap: Record<string, LucideIcon> = {
   Clock3,
   CalendarDays,
   Wallet,
+  Banknote,
   FileText,
   BarChart3,
   Bell,
