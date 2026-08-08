@@ -39,7 +39,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     selfServiceLabel: 'My Attendance',
     path: '/attendance',
     icon: 'Clock3',
-    module: 'Module 6',
+    module: 'Module 7',
     requiredPermission: PERMISSIONS.ATTENDANCE_VIEW,
   },
   {
@@ -48,7 +48,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     selfServiceLabel: 'My Leave',
     path: '/leave',
     icon: 'CalendarDays',
-    module: 'Module 7',
+    module: 'Module 8',
     requiredPermission: PERMISSIONS.LEAVE_VIEW,
   },
   {

@@ -16,6 +16,9 @@ export type StatusTone =
   | 'probation'
   | 'on_leave'
   | 'terminated'
+  | 'holiday'
+  | 'week_off'
+  | 'not_marked'
 
 const statusConfig: Record<StatusTone, { label: string; variant: BadgeVariant }> = {
   active: { label: 'Active', variant: 'success' },
@@ -33,6 +36,9 @@ const statusConfig: Record<StatusTone, { label: string; variant: BadgeVariant }>
   probation: { label: 'Probation', variant: 'warning' },
   on_leave: { label: 'On Leave', variant: 'info' },
   terminated: { label: 'Terminated', variant: 'danger' },
+  holiday: { label: 'Holiday', variant: 'neutral' },
+  week_off: { label: 'Week Off', variant: 'neutral' },
+  not_marked: { label: 'Not Marked', variant: 'neutral' },
 }
 
 export interface StatusBadgeProps {

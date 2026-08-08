@@ -24,7 +24,7 @@ export function DashboardPage() {
 
     try {
       if (isEmployeeUser) {
-        const data = await dashboardService.getEmployeeDashboard()
+        const data = await dashboardService.getEmployeeDashboard(user ?? undefined)
         setEmployeeData(data)
         setAdminData(null)
       } else {
@@ -39,7 +39,7 @@ export function DashboardPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [isEmployeeUser])
+  }, [isEmployeeUser, user])
 
   useEffect(() => {
     void loadDashboard()

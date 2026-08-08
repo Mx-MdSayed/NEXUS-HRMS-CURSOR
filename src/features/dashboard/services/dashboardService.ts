@@ -4,6 +4,8 @@ import { mockEmployeeDashboard } from '../data/mockEmployeeDashboard'
 import { employeeService } from '@/features/employees'
 import { departmentService } from '@/features/organization/services/departmentService'
 import { listActiveDepartmentOptions } from '@/features/organization/data/orgDb'
+import { attendanceService } from '@/features/attendance/services/attendanceService'
+import { format } from 'date-fns'
 
 function delay(ms = 500): Promise<void> {
   return new Promise((resolve) => {
@@ -13,12 +15,12 @@ function delay(ms = 500): Promise<void> {
 
 export interface DashboardService {
   getAdminDashboard(): Promise<AdminDashboardData>
-  getEmployeeDashboard(): Promise<EmployeeDashboardData>
+  getEmployeeDashboard(user?: { email?: string; employeeId?: string | null; name?: string }): Promise<EmployeeDashboardData>
 }
 
 /**
  * Dashboard data adapter.
- * Recent employees and department KPI prefer live services when available.
+ * Live services preferred when available (employees, departments, attendance).
  */
 export const dashboardService: DashboardService = {
   async getAdminDashboard() {
@@ -74,11 +76,94 @@ export const dashboardService: DashboardService = {
       // Keep mock department metrics if organization services are unavailable.
     }
 
+    try {
+      const today = await attendanceService.getTodayAttendance()
+      const setKpi = (id: string, value: number, subtitle?: string) => {
+        const kpi = data.kpis.find((item) => item.id === id)
+        if (!kpi) return
+        kpi.value = value
+        if (subtitle) kpi.subtitle = subtitle
+      }
+      setKpi('present-today', today.stats.present, 'Present today')
+      setKpi('absent-today', today.stats.absent, 'Absent today')
+      setKpi('on-leave', today.stats.onLeave, 'Today')
+      setKpi('late-today', today.stats.late, 'Needs attention')
+
+      data.attendanceOverview = [
+        { status: 'present', label: 'Present', count: today.stats.present },
+        { status: 'absent', label: 'Absent', count: today.stats.absent },
+        { status: 'late', label: 'Late', count: today.stats.late },
+        { status: 'on_leave', label: 'On Leave', count: today.stats.onLeave },
+      ]
+
+      data.todayAttendance = today.rows
+        .filter((row) => row.status !== 'not_marked' && row.status !== 'week_off' && row.status !== 'holiday')
+        .slice(0, 8)
+        .map((row) => ({
+          id: row.employeeId,
+          employeeName: row.fullName,
+          employeeId: row.employeeCode,
+          checkIn: row.attendance?.checkIn
+            ? format(new Date(row.attendance.checkIn), 'hh:mm a')
+            : undefined,
+          checkOut: row.attendance?.checkOut
+            ? format(new Date(row.attendance.checkOut), 'hh:mm a')
+            : undefined,
+          status:
+            row.status === 'half_day'
+              ? 'present'
+              : (row.status as 'present' | 'absent' | 'late' | 'on_leave'),
+        }))
+
+      data.leaveSummary = {
+        ...data.leaveSummary,
+        onLeaveToday: today.stats.onLeave,
+      }
+    } catch {
+      // Keep mock attendance values if attendance service is unavailable.
+    }
+
     return data
   },
 
-  async getEmployeeDashboard() {
+  async getEmployeeDashboard(user) {
     await delay()
-    return structuredClone(mockEmployeeDashboard)
+    const data = structuredClone(mockEmployeeDashboard)
+    if (!user) return data
+
+    try {
+      const employeeId = await attendanceService.resolveLinkedEmployeeId(user)
+      if (!employeeId) return data
+      const todayKey = attendanceService.getSettingsToday()
+      const monthKey = todayKey.slice(0, 7)
+      const page = await attendanceService.getEmployeeAttendancePage(employeeId, monthKey)
+      const todayRecord = page.records.find((item) => item.date === todayKey)
+      const rawStatus = todayRecord?.status
+      const mappedStatus: EmployeeDashboardData['attendanceToday']['status'] =
+        rawStatus === 'present' || rawStatus === 'late' || rawStatus === 'absent' || rawStatus === 'on_leave'
+          ? rawStatus
+          : rawStatus === 'half_day'
+            ? 'present'
+            : 'not_checked_in'
+      data.attendanceToday = {
+        status: mappedStatus,
+        checkIn: todayRecord?.checkIn
+          ? format(new Date(todayRecord.checkIn), 'hh:mm a')
+          : undefined,
+        checkOut: todayRecord?.checkOut
+          ? format(new Date(todayRecord.checkOut), 'hh:mm a')
+          : undefined,
+      }
+      data.monthlyAttendance = {
+        present: page.stats.presentDays,
+        absent: page.stats.absentDays,
+        late: page.stats.lateDays,
+        leave: page.stats.leaveDays,
+      }
+    } catch {
+      // Keep mock employee attendance if service unavailable.
+    }
+
+    return data
   },
 }

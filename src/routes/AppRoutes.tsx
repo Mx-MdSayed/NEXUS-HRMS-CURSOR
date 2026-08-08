@@ -18,6 +18,14 @@ import {
   DesignationEditPage,
   DesignationListPage,
 } from '@/features/organization'
+import {
+  AttendanceCalendarPage,
+  AttendanceCorrectionsPage,
+  AttendanceIndexPage,
+  AttendanceSummaryPage,
+  EmployeeAttendancePage,
+  TodayAttendancePage,
+} from '@/features/attendance'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -177,11 +185,47 @@ export function AppRoutes() {
           path="attendance"
           element={
             <PermissionRoute permission={PERMISSIONS.ATTENDANCE_VIEW}>
-              <PlaceholderPage
-                title="Attendance"
-                moduleLabel="Module 7"
-                description="Attendance tracking, check-in/out, and timesheets will be implemented in a later module."
-              />
+              <AttendanceIndexPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="attendance/today"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ATTENDANCE_VIEW}>
+              <TodayAttendancePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="attendance/calendar"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ATTENDANCE_VIEW}>
+              <AttendanceCalendarPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="attendance/summary"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ATTENDANCE_VIEW}>
+              <AttendanceSummaryPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="attendance/corrections"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ATTENDANCE_VIEW}>
+              <AttendanceCorrectionsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="attendance/:employeeId"
+          element={
+            <PermissionRoute permission={PERMISSIONS.ATTENDANCE_VIEW}>
+              <EmployeeAttendancePage />
             </PermissionRoute>
           }
         />
@@ -191,8 +235,8 @@ export function AppRoutes() {
             <PermissionRoute permission={PERMISSIONS.LEAVE_VIEW}>
               <PlaceholderPage
                 title="Leave Management"
-                moduleLabel="Module 7"
-                description="Leave policies, requests, and approvals will be implemented in Module 7."
+                moduleLabel="Module 8"
+                description="Leave policies, requests, and approvals will be implemented in a later module."
               />
             </PermissionRoute>
           }
