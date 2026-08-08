@@ -1,0 +1,34 @@
+import {
+  BarChart3,
+  Bell,
+  BriefcaseBusiness,
+  Building2,
+  CalendarDays,
+  Clock3,
+  FileText,
+  LayoutDashboard,
+  Settings,
+  Shield,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react'
+
+const iconMap: Record<string, LucideIcon> = {
+  LayoutDashboard,
+  Users,
+  Building2,
+  BriefcaseBusiness,
+  Clock3,
+  CalendarDays,
+  Wallet,
+  FileText,
+  BarChart3,
+  Bell,
+  Shield,
+  Settings,
+}
+
+export function getNavIcon(name: string): LucideIcon {
+  return iconMap[name] ?? LayoutDashboard
+}
