@@ -1,5 +1,5 @@
 import { format, parseISO, startOfMonth, endOfMonth } from 'date-fns'
-import type { AttendanceStatus } from '@/types'
+import type { AttendanceStatus } from '@/features/attendance/types'
 import type { EmployeeSalary } from '@/features/salary/types'
 import { roundSalaryAmount } from '@/features/salary/utils/money'
 import { calculateWorkingDaysInMonth } from '@/features/attendance/utils/calculations'
@@ -45,7 +45,7 @@ export function overlapDays(
 }
 
 export function calculateWorkingDays(month: number, year: number): number {
-  return calculateWorkingDaysInMonth(getPeriodBounds(month, year).monthKey)
+  return calculateWorkingDaysInMonth(getPeriodBounds(month, year).monthKey, []).applicableWorkingDays
 }
 
 export interface AttendanceLeaveInput {
@@ -450,7 +450,7 @@ export function summarizeAttendanceFromRecords(
   for (const r of records) {
     overtimeMinutes += r.overtimeMinutes
     lateMinutes += r.lateMinutes
-    if (r.status === 'present' || r.status === 'remote' || r.status === 'on_duty') {
+    if (r.status === 'present' || r.status === 'late') {
       presentDays += 1
     } else if (r.status === 'half_day') {
       halfDays += 1

@@ -1,5 +1,4 @@
 import type { EmployeeListItem } from '@/features/employees/types'
-import type { EmployeeSalary } from '@/features/salary/types'
 import { employeeSalaryService } from '@/features/salary/services/employeeSalaryService'
 import { attendanceService } from '@/features/attendance/services/attendanceService'
 import { leaveService } from '@/features/leave/services/leaveService'
