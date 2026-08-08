@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary-50: #eef8f7;
+  --color-primary-100: #d5efec;
+  --color-primary-200: #abe0da;
+  --color-primary-300: #78cbc3;
+  --color-primary-400: #48ada5;
+  --color-primary-500: #2f918a;
+  --color-primary-600: #247470;
+  --color-primary-700: #215d5a;
+  --color-primary-800: #1f4b4a;
+  --color-primary-900: #1d3f3e;
+  --color-primary-950: #0b2424;
+
+  --color-surface-50: #f8fafb;
+  --color-surface-100: #f1f4f6;
+  --color-surface-200: #e4e9ee;
+  --color-surface-300: #cfd8e1;
+  --color-surface-400: #98a7b6;
+  --color-surface-500: #6b7c8f;
+  --color-surface-600: #516274;
+  --color-surface-700: #3f4d5c;
+  --color-surface-800: #2c3641;
+  --color-surface-900: #1c242d;
+  --color-surface-950: #11161c;
+
+  --shadow-card: 0 1px 2px rgb(17 22 28 / 0.04), 0 1px 3px rgb(17 22 28 / 0.06);
+  --shadow-elevated: 0 8px 24px rgb(17 22 28 / 0.08);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-surface-50 font-sans text-surface-900;
+    @apply dark:bg-surface-950 dark:text-surface-100;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-500;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+}
