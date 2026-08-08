@@ -68,6 +68,18 @@ import {
   PayslipsPage,
 } from '@/features/payslip'
 import {
+  NotificationDetailPage,
+  NotificationSettingsPage,
+  NotificationTemplateFormPage,
+  NotificationTemplatesPage,
+  NotificationsPage,
+} from '@/features/notifications'
+import {
+  WorkflowRequestDetailPage,
+  WorkflowRequestsPage,
+  WorkflowsDashboardPage,
+} from '@/features/workflows'
+import {
   EssAttendanceCalendarPage,
   EssAttendancePage,
   EssDashboardPage,
@@ -736,11 +748,77 @@ export function AppRoutes() {
           path="notifications"
           element={
             <PermissionRoute permission={PERMISSIONS.NOTIFICATION_VIEW}>
-              <PlaceholderPage
-                title="Notifications"
-                moduleLabel="Later module"
-                description="In-app notifications and alert preferences will be implemented later."
-              />
+              <NotificationsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="notifications/settings"
+          element={
+            <PermissionRoute permission={PERMISSIONS.NOTIFICATION_VIEW}>
+              <NotificationSettingsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="notifications/templates"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.NOTIFICATION_TEMPLATE_MANAGE, PERMISSIONS.NOTIFICATION_MANAGE]}
+            >
+              <NotificationTemplatesPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="notifications/templates/new"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.NOTIFICATION_TEMPLATE_MANAGE, PERMISSIONS.NOTIFICATION_MANAGE]}
+            >
+              <NotificationTemplateFormPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="notifications/templates/:id/edit"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.NOTIFICATION_TEMPLATE_MANAGE, PERMISSIONS.NOTIFICATION_MANAGE]}
+            >
+              <NotificationTemplateFormPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="notifications/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.NOTIFICATION_VIEW}>
+              <NotificationDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="workflows"
+          element={
+            <PermissionRoute permission={PERMISSIONS.WORKFLOW_VIEW}>
+              <WorkflowsDashboardPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="workflows/requests"
+          element={
+            <PermissionRoute permission={PERMISSIONS.WORKFLOW_VIEW}>
+              <WorkflowRequestsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="workflows/requests/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.WORKFLOW_VIEW}>
+              <WorkflowRequestDetailPage />
             </PermissionRoute>
           }
         />

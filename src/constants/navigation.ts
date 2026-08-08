@@ -91,12 +91,20 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     requiredPermission: PERMISSIONS.REPORTS_VIEW,
   },
   {
+    id: 'workflows',
+    label: 'Workflows',
+    path: '/workflows',
+    icon: 'RefreshCw',
+    module: 'Module 13',
+    requiredPermission: PERMISSIONS.WORKFLOW_VIEW,
+  },
+  {
     id: 'notifications',
     label: 'Notifications',
     path: '/notifications',
     selfServicePath: '/employee/notifications',
     icon: 'Bell',
-    module: 'Module 4',
+    module: 'Module 13',
     requiredPermission: PERMISSIONS.NOTIFICATION_VIEW,
   },
   {
@@ -204,7 +212,7 @@ export const ESS_NAVIGATION_ITEMS: NavigationItem[] = [
     path: '/employee/notifications',
     selfServicePath: '/employee/notifications',
     icon: 'Bell',
-    module: 'Module 12',
+    module: 'Module 13',
     requiredPermission: PERMISSIONS.NOTIFICATION_VIEW,
   },
   {

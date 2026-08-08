@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Bell, KeyRound, LogOut, Menu, Moon, Settings, Sun, UserRound } from 'lucide-react'
+import { KeyRound, LogOut, Menu, Moon, Settings, Sun, UserRound } from 'lucide-react'
 import { APP_NAME, NAVIGATION_ITEMS } from '@/constants'
 import { PERMISSIONS } from '@/constants/permissions'
 import { ROLES } from '@/constants/roles'
@@ -9,6 +9,7 @@ import { useSidebar } from '@/contexts/SidebarContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { formatRole } from '@/utils/status'
 import { Avatar, Button, Dropdown, Tooltip } from '@/components/ui'
+import { NotificationBell } from '@/features/notifications'
 
 function usePageTitle(): string {
   const { pathname } = useLocation()
@@ -114,18 +115,7 @@ export function Header() {
         </Tooltip>
 
         {hasPermission(PERMISSIONS.NOTIFICATION_VIEW) ? (
-          <Tooltip content="Notifications">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="relative !px-2"
-              aria-label="Notifications"
-              onClick={() => navigate(isEmployeeUser ? '/employee/notifications' : '/notifications')}
-            >
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary-500" aria-hidden />
-            </Button>
-          </Tooltip>
+          <NotificationBell />
         ) : null}
 
         <Dropdown

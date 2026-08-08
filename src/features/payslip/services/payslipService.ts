@@ -261,6 +261,9 @@ export const payslipService = {
     const { run, employee } = await findPayrollEmployeeById(payrollEmployeeId)
     const payslip = await buildPayslipFromPayrollEmployee(run, employee, actor)
     payslipsDb.push(payslip)
+    void import('@/features/notifications').then(({ notificationTriggerService }) =>
+      notificationTriggerService.notifyPayslipGenerated({ payslip }),
+    ).catch((error) => console.warn('Payslip notification failed', error))
     return structuredClone(payslip)
   },
 
@@ -278,6 +281,9 @@ export const payslipService = {
       const payslip = await buildPayslipFromPayrollEmployee(run, employee, actor)
       payslipsDb.push(payslip)
       generated.push(payslip)
+      void import('@/features/notifications').then(({ notificationTriggerService }) =>
+        notificationTriggerService.notifyPayslipGenerated({ payslip }),
+      ).catch((error) => console.warn('Payslip notification failed', error))
     }
     return structuredClone(generated)
   },

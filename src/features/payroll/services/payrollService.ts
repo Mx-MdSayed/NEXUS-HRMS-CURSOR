@@ -36,6 +36,12 @@ function actorName(actor?: string) {
   return actor?.trim() || 'System'
 }
 
+async function actorEmployeeId(actor: string): Promise<string> {
+  const page = await employeeService.getEmployees({ filters: { search: actor }, page: 1, pageSize: 20 })
+  const match = page.data.find((item) => item.fullName.toLowerCase() === actor.toLowerCase())
+  return match?.id ?? actor
+}
+
 function pushAudit(
   action: PayrollAuditEvent['action'],
   payrollRunId: string,
@@ -575,6 +581,27 @@ export const payrollService = {
     }
     pushAudit('submitted', id, name, 'calculated', 'pending_approval')
     await payrollPeriodService.setStatus(run.periodId, 'pending_approval', name)
+    void import('@/features/workflows').then(async ({ workflowRoutingService, workflowService }) => {
+      const approver = await workflowRoutingService.getApproverForPayroll()
+      const workflow = await workflowService.create({
+        type: 'payroll',
+        title: `Approve ${runsDb[idx].name}`,
+        description: `${runsDb[idx].name} for ${runsDb[idx].monthKey} is pending approval.`,
+        requesterId: await actorEmployeeId(name),
+        requesterName: name,
+        assignedToId: approver.id,
+        assignedToName: approver.name,
+        referenceType: 'payroll',
+        referenceId: id,
+        priority: 'urgent',
+      })
+      const { notificationTriggerService } = await import('@/features/notifications')
+      await notificationTriggerService.notifyPayrollSubmitted({
+        run: runsDb[idx],
+        approverIds: [approver.id],
+        workflowId: workflow.id,
+      })
+    }).catch((error) => console.warn('Payroll workflow notification failed', error))
     return structuredClone(runsDb[idx])
   },
 
@@ -603,6 +630,12 @@ export const payrollService = {
     }
     pushAudit('approved', id, name, previous, 'approved')
     await payrollPeriodService.setStatus(run.periodId, 'approved', name)
+    void import('@/features/workflows').then(({ workflowService }) =>
+      workflowService.completeByReference('payroll', id, name),
+    ).catch((error) => console.warn('Payroll workflow completion failed', error))
+    void import('@/features/notifications').then(({ notificationTriggerService }) =>
+      notificationTriggerService.notifyPayrollApproved({ run: runsDb[idx], actorName: name }),
+    ).catch((error) => console.warn('Payroll approval notification failed', error))
     return structuredClone(runsDb[idx])
   },
 
@@ -634,6 +667,12 @@ export const payrollService = {
     }
     pushAudit('rejected', id, name, previous, 'calculated', reason.trim())
     await payrollPeriodService.setStatus(run.periodId, 'calculated', name)
+    void import('@/features/workflows').then(({ workflowService }) =>
+      workflowService.rejectByReference('payroll', id, name, reason),
+    ).catch((error) => console.warn('Payroll workflow rejection failed', error))
+    void import('@/features/notifications').then(({ notificationTriggerService }) =>
+      notificationTriggerService.notifyPayrollRejected({ run: runsDb[idx], actorName: name, reason }),
+    ).catch((error) => console.warn('Payroll rejection notification failed', error))
     return structuredClone(runsDb[idx])
   },
 
@@ -658,6 +697,9 @@ export const payrollService = {
     // Snapshots already stored on PayrollEmployee/PayrollComponent — lock by status only.
     pushAudit('finalized', id, name, 'approved', 'finalized')
     await payrollPeriodService.setStatus(run.periodId, 'finalized', name)
+    void import('@/features/notifications').then(({ notificationTriggerService }) =>
+      notificationTriggerService.notifyPayrollFinalized({ run: runsDb[idx], actorName: name }),
+    ).catch((error) => console.warn('Payroll finalization notification failed', error))
     return structuredClone(runsDb[idx])
   },
 

@@ -5,8 +5,10 @@ import type { AttendanceStatus } from '@/features/attendance/types'
 import { employeeService } from '@/features/employees/services/employeeService'
 import type { Employee } from '@/features/employees/types'
 import { leaveService } from '@/features/leave/services/leaveService'
+import { notificationService } from '@/features/notifications/services/notificationService'
 import { payslipService } from '@/features/payslip/services/payslipService'
 import { employeeSalaryService } from '@/features/salary/services/employeeSalaryService'
+import { workflowService } from '@/features/workflows/services/workflowService'
 import { authService, type ChangePasswordInput } from '@/services/auth'
 import { calculateProfileCompleteness } from '../utils/profileCompleteness'
 import type {
@@ -15,10 +17,10 @@ import type {
   EssDashboardData,
   EssEditableProfile,
   EssLeaveApplyValues,
+  EssNotificationType,
   EssRequest,
 } from '../types'
 import { essDocumentService } from './essDocumentService'
-import { essNotificationService } from './essNotificationService'
 import { EssServiceError } from './errors'
 import { profileChangeRequestService } from './profileChangeRequestService'
 
@@ -83,6 +85,22 @@ function statusToRequestStatus(status: string): EssRequest['status'] {
   return 'pending'
 }
 
+function workflowTypeToEssType(type: string): EssRequest['type'] {
+  if (type === 'attendance_correction') return 'attendance_correction'
+  if (type === 'profile_change') return 'profile_change'
+  if (type === 'leave') return 'leave'
+  return 'other'
+}
+
+function notificationCategoryToEssType(category: string): EssNotificationType {
+  if (category === 'leave') return 'leave'
+  if (category === 'attendance') return 'attendance'
+  if (category === 'profile') return 'profile'
+  if (category === 'payslip') return 'payslip'
+  if (category === 'payroll') return 'hr'
+  return 'system'
+}
+
 export async function requireCurrentEmployee(user?: User | null): Promise<Employee> {
   if (!user) throw new EssServiceError('UNAUTHORIZED', 'Sign in is required for self-service.')
   const employeeId = await attendanceService.resolveLinkedEmployeeId(user)
@@ -128,13 +146,13 @@ export const employeeSelfServiceService = {
       leaveService.getLeaveRequests({ employeeId: employee.id }, 1, 5),
       employeeSalaryService.getEmployeeSalary(employee.id),
       payslipService.getEmployeePayslips(employee.id),
-      essNotificationService.getNotifications(employee.id),
+      notificationService.getNotifications(employee.id, {}, 1, 5),
       attendanceService.getCorrectionRequests({ employeeId: employee.id }),
     ])
 
     const leaveSummary = sumLeaveSummary(leaveBalances)
     const todayAttendance = today.rows.find((row) => row.employeeId === employee.id)?.attendance
-    const unread = notifications.filter((item) => !item.isRead).length
+    const unread = notifications.data.filter((item) => !item.isRead).length
     const recentActivity = [
       ...leaveHistory.data.map((item) => ({
         id: `leave-${item.id}`,
@@ -150,12 +168,12 @@ export const employeeSelfServiceService = {
         date: item.requestedAt,
         type: 'attendance_correction' as const,
       })),
-      ...notifications.slice(0, 3).map((item) => ({
+      ...notifications.data.slice(0, 3).map((item) => ({
         id: `notification-${item.id}`,
         title: item.title,
         description: item.message,
         date: item.createdAt,
-        type: item.type,
+        type: notificationCategoryToEssType(item.category),
       })),
     ]
       .sort((a, b) => b.date.localeCompare(a.date))
@@ -377,13 +395,24 @@ export const employeeSelfServiceService = {
 
   async getRequests(user?: User | null): Promise<EssRequest[]> {
     const employee = await requireCurrentEmployee(user)
-    const [leaveRows, corrections, profileChanges] = await Promise.all([
+    const [workflowRows, leaveRows, corrections, profileChanges] = await Promise.all([
+      workflowService.list({ requesterId: employee.id }, 1, 200),
       leaveService.getLeaveRequests({ employeeId: employee.id }, 1, 200),
       attendanceService.getCorrectionRequests({ employeeId: employee.id }),
       profileChangeRequestService.getMyRequests(employee.id),
     ])
 
     return [
+      ...workflowRows.data.map((item) => ({
+        id: `workflow-${item.id}`,
+        type: workflowTypeToEssType(item.type),
+        title: item.title,
+        description: item.description ?? item.type.replaceAll('_', ' '),
+        status: statusToRequestStatus(item.status),
+        createdAt: item.createdAt,
+        href: `/employee/requests/workflow-${item.id}`,
+        sourceId: item.id,
+      })),
       ...leaveRows.data.map((item) => ({
         id: `leave-${item.id}`,
         type: 'leave' as const,
@@ -426,17 +455,38 @@ export const employeeSelfServiceService = {
 
   async getNotifications(user?: User | null) {
     const employee = await requireCurrentEmployee(user)
-    return essNotificationService.getNotifications(employee.id)
+    const page = await notificationService.getNotifications(employee.id, {}, 1, 200)
+    return page.data.map((item) => ({
+      id: item.id,
+      employeeId: employee.id,
+      title: item.title,
+      message: item.message,
+      type: notificationCategoryToEssType(item.category),
+      isRead: item.isRead,
+      createdAt: item.createdAt,
+      href: item.href,
+    }))
   },
 
   async markNotificationAsRead(user: User | null | undefined, id: string) {
     const employee = await requireCurrentEmployee(user)
-    return essNotificationService.markAsRead(employee.id, id)
+    const item = await notificationService.markAsRead(employee.id, id)
+    return {
+      id: item.id,
+      employeeId: employee.id,
+      title: item.title,
+      message: item.message,
+      type: notificationCategoryToEssType(item.category),
+      isRead: item.isRead,
+      createdAt: item.createdAt,
+      href: item.href,
+    }
   },
 
   async markAllNotificationsAsRead(user?: User | null) {
     const employee = await requireCurrentEmployee(user)
-    return essNotificationService.markAllAsRead(employee.id)
+    await notificationService.markAllAsRead(employee.id)
+    return this.getNotifications(user)
   },
 
   async changePassword(_user: User | null | undefined, data: ChangePasswordInput) {

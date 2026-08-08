@@ -659,6 +659,28 @@ export const attendanceService = {
       requestedBy: actorName,
     }
     correctionsDb = [correction, ...correctionsDb]
+    void import('@/features/workflows').then(async ({ workflowRoutingService, workflowService }) => {
+      const approver = await workflowRoutingService.getApproverForAttendance(correction.employeeId)
+      const workflow = await workflowService.create({
+        type: 'attendance_correction',
+        title: `Attendance correction for ${correction.date}`,
+        description: correction.reason,
+        requesterId: correction.employeeId,
+        requesterName: actorName,
+        assignedToId: approver.id,
+        assignedToName: approver.name,
+        referenceType: 'attendance_correction',
+        referenceId: correction.id,
+        priority: 'normal',
+        metadata: { date: correction.date, requestedStatus: correction.requestedStatus },
+      })
+      const { notificationTriggerService } = await import('@/features/notifications')
+      await notificationTriggerService.notifyAttendanceCorrectionSubmitted({
+        correction,
+        approverIds: [approver.id],
+        workflowId: workflow.id,
+      })
+    }).catch((error) => console.warn('Attendance workflow notification failed', error))
     return structuredClone(correction)
   },
 
@@ -716,6 +738,12 @@ export const attendanceService = {
       changedBy: actorName,
       reason: correction.reason,
     })
+    void import('@/features/workflows').then(({ workflowService }) =>
+      workflowService.completeByReference('attendance_correction', updated.id, actorName),
+    ).catch((error) => console.warn('Attendance workflow completion failed', error))
+    void import('@/features/notifications').then(({ notificationTriggerService }) =>
+      notificationTriggerService.notifyAttendanceCorrectionApproved({ correction: updated, actorName }),
+    ).catch((error) => console.warn('Attendance approval notification failed', error))
     return structuredClone(updated)
   },
 
@@ -749,6 +777,21 @@ export const attendanceService = {
       changedBy: actorName,
       reason: reviewComment || correction.reason,
     })
+    void import('@/features/workflows').then(({ workflowService }) =>
+      workflowService.rejectByReference(
+        'attendance_correction',
+        updated.id,
+        actorName,
+        reviewComment || correction.reason,
+      ),
+    ).catch((error) => console.warn('Attendance workflow rejection failed', error))
+    void import('@/features/notifications').then(({ notificationTriggerService }) =>
+      notificationTriggerService.notifyAttendanceCorrectionRejected({
+        correction: updated,
+        actorName,
+        reason: reviewComment || correction.reason,
+      }),
+    ).catch((error) => console.warn('Attendance rejection notification failed', error))
     return structuredClone(updated)
   },
 

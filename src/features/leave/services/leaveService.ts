@@ -621,6 +621,29 @@ export const leaveService = {
       user: actorName,
       newValue: LEAVE_REQUEST_STATUSES.PENDING,
     })
+    void import('@/features/workflows').then(async ({ workflowRoutingService, workflowService }) => {
+      const approver = await workflowRoutingService.getApproverForLeave(request.employeeId)
+      const workflow = await workflowService.create({
+        type: 'leave',
+        title: `${leaveType.name} leave request`,
+        description: request.reason,
+        requesterId: request.employeeId,
+        requesterName: actorName,
+        assignedToId: approver.id,
+        assignedToName: approver.name,
+        referenceType: 'leave',
+        referenceId: request.id,
+        priority: 'high',
+        metadata: { startDate: request.startDate, endDate: request.endDate, duration: request.duration },
+      })
+      const { notificationTriggerService } = await import('@/features/notifications')
+      await notificationTriggerService.notifyLeaveSubmitted({
+        request,
+        leaveTypeName: leaveType.name,
+        approverIds: [approver.id],
+        workflowId: workflow.id,
+      })
+    }).catch((error) => console.warn('Leave workflow notification failed', error))
     return structuredClone(request)
   },
 
@@ -737,6 +760,12 @@ export const leaveService = {
       previousValue: LEAVE_REQUEST_STATUSES.PENDING,
       newValue: LEAVE_REQUEST_STATUSES.APPROVED,
     })
+    void import('@/features/workflows').then(({ workflowService }) =>
+      workflowService.completeByReference('leave', updated.id, actorName),
+    ).catch((error) => console.warn('Leave workflow completion failed', error))
+    void import('@/features/notifications').then(({ notificationTriggerService }) =>
+      notificationTriggerService.notifyLeaveApproved({ request: updated, leaveTypeName: leaveType.name, actorName }),
+    ).catch((error) => console.warn('Leave approval notification failed', error))
     return structuredClone(updated)
   },
 
@@ -783,6 +812,12 @@ export const leaveService = {
       newValue: LEAVE_REQUEST_STATUSES.REJECTED,
       reason: reason.trim(),
     })
+    void import('@/features/workflows').then(({ workflowService }) =>
+      workflowService.rejectByReference('leave', updated.id, actorName, reason),
+    ).catch((error) => console.warn('Leave workflow rejection failed', error))
+    void import('@/features/notifications').then(({ notificationTriggerService }) =>
+      notificationTriggerService.notifyLeaveRejected({ request: updated, leaveTypeName: leaveType.name, actorName, reason }),
+    ).catch((error) => console.warn('Leave rejection notification failed', error))
     return structuredClone(updated)
   },
 
