@@ -8,6 +8,7 @@ import { attendanceService } from '@/features/attendance/services/attendanceServ
 import { leaveService } from '@/features/leave/services/leaveService'
 import { LEAVE_REQUEST_STATUSES } from '@/features/leave/constants'
 import { employeeSalaryService } from '@/features/salary/services/employeeSalaryService'
+import { payrollService } from '@/features/payroll/services/payrollService'
 import { format } from 'date-fns'
 
 function delay(ms = 500): Promise<void> {
@@ -168,25 +169,51 @@ export const dashboardService: DashboardService = {
     }
 
     try {
-      const salaryOverview = await employeeSalaryService.getOverviewStats()
+      const payrollOverview = await payrollService.getOverviewStats()
+      const currentRuns = await payrollService.getPayrollRuns({ month: 8, year: 2026 })
+      const current = currentRuns.find((r) => r.status !== 'cancelled')
+      const mappedStatus: AdminDashboardData['payrollSummary']['status'] =
+        current?.status === 'finalized'
+          ? 'paid'
+          : current?.status === 'approved'
+            ? 'approved'
+            : current?.status === 'processing' || current?.status === 'pending_approval'
+              ? 'processing'
+              : 'draft'
       data.payrollSummary = {
-        ...data.payrollSummary,
-        periodLabel: 'Compensation snapshot (pre-payroll)',
-        totalPayroll: Math.round(salaryOverview.totalMonthlyGross),
-        paidAmount: 0,
-        pendingAmount: Math.round(salaryOverview.totalMonthlyGross),
-        employeesProcessed: 0,
-        totalEmployees: salaryOverview.employeesWithSalary,
-        status: 'draft',
-      }
-      const payrollAction = data.quickActions.find((item) => item.path === '/payroll')
-      if (payrollAction) {
-        payrollAction.path = '/salary'
-        payrollAction.label = 'Salary & Compensation'
-        payrollAction.description = 'Manage structures and assignments'
+        periodLabel: payrollOverview.currentMonthLabel,
+        totalPayroll: Math.round(payrollOverview.netPayroll || payrollOverview.grossPayroll),
+        paidAmount: current?.status === 'finalized' ? Math.round(current.totalNetPayroll) : 0,
+        pendingAmount:
+          current && current.status !== 'finalized'
+            ? Math.round(current.totalNetPayroll || payrollOverview.grossPayroll)
+            : 0,
+        employeesProcessed:
+          current?.status === 'calculated' ||
+          current?.status === 'pending_approval' ||
+          current?.status === 'approved' ||
+          current?.status === 'finalized'
+            ? current.employeeCount
+            : 0,
+        totalEmployees: payrollOverview.totalEmployees,
+        status: mappedStatus,
       }
     } catch {
-      // Keep mock payroll summary if salary service is unavailable.
+      try {
+        const salaryOverview = await employeeSalaryService.getOverviewStats()
+        data.payrollSummary = {
+          ...data.payrollSummary,
+          periodLabel: 'Compensation snapshot (pre-payroll)',
+          totalPayroll: Math.round(salaryOverview.totalMonthlyGross),
+          paidAmount: 0,
+          pendingAmount: Math.round(salaryOverview.totalMonthlyGross),
+          employeesProcessed: 0,
+          totalEmployees: salaryOverview.employeesWithSalary,
+          status: 'draft',
+        }
+      } catch {
+        // Keep mock payroll summary if services are unavailable.
+      }
     }
 
     return data

@@ -3,6 +3,7 @@ import type { AttendanceStatus } from '@/features/attendance/types'
 import type { EmployeeSalary } from '@/features/salary/types'
 import { roundSalaryAmount } from '@/features/salary/utils/money'
 import { calculateWorkingDaysInMonth } from '@/features/attendance/utils/calculations'
+import { initialHolidays } from '@/features/attendance/data/mockHolidays'
 import type { PayrollComponent, PayrollSettings } from '../types'
 import { getPayrollSettings } from '../settings'
 
@@ -45,7 +46,10 @@ export function overlapDays(
 }
 
 export function calculateWorkingDays(month: number, year: number): number {
-  return calculateWorkingDaysInMonth(getPeriodBounds(month, year).monthKey, []).applicableWorkingDays
+  return calculateWorkingDaysInMonth(
+    getPeriodBounds(month, year).monthKey,
+    initialHolidays,
+  ).applicableWorkingDays
 }
 
 export interface AttendanceLeaveInput {

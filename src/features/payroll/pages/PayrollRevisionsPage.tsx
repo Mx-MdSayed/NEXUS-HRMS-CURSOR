@@ -47,7 +47,9 @@ export function PayrollRevisionsPage() {
       setError(null)
       try {
         const runs = await payrollService.getPayrollRuns({})
-        const calculatedRuns = runs.filter((run) => run.status === 'calculated' || run.status === 'finalized')
+        const calculatedRuns = runs.filter((run) =>
+          ['calculated', 'pending_approval', 'approved', 'finalized'].includes(run.status),
+        )
         const employeeGroups = await Promise.all(
           calculatedRuns.map(async (run) => {
             const employees = await payrollService.getRunEmployees(run.id)

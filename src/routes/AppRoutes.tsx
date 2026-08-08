@@ -49,6 +49,17 @@ import {
   SalaryStructureFormPage,
   SalaryStructuresPage,
 } from '@/features/salary'
+import {
+  PayrollEmployeeDetailPage,
+  PayrollEmployeesPage,
+  PayrollIndexPage,
+  PayrollRevisionsPage,
+  PayrollRunDetailPage,
+  PayrollRunEditPage,
+  PayrollRunNewPage,
+  PayrollRunsPage,
+  PayrollSettingsPage,
+} from '@/features/payroll'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -432,11 +443,79 @@ export function AppRoutes() {
           path="payroll"
           element={
             <PermissionRoute permission={PERMISSIONS.PAYROLL_VIEW}>
-              <PlaceholderPage
-                title="Payroll"
-                moduleLabel="Later module"
-                description="Monthly payroll processing will be implemented in a later module. Salary structures are available under Salary."
-              />
+              <PayrollIndexPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payroll/runs"
+          element={
+            <PermissionRoute permission={PERMISSIONS.PAYROLL_VIEW}>
+              <PayrollRunsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payroll/runs/new"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.PAYROLL_CREATE, PERMISSIONS.PAYROLL_MANAGE]}
+            >
+              <PayrollRunNewPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payroll/runs/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.PAYROLL_VIEW}>
+              <PayrollRunDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payroll/runs/:id/edit"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.PAYROLL_EDIT, PERMISSIONS.PAYROLL_MANAGE]}>
+              <PayrollRunEditPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payroll/employees"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.PAYROLL_VIEW, PERMISSIONS.PAYROLL_EMPLOYEE_VIEW]}
+            >
+              <PayrollEmployeesPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payroll/employees/:employeeId"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.PAYROLL_VIEW, PERMISSIONS.PAYROLL_EMPLOYEE_VIEW]}
+            >
+              <PayrollEmployeeDetailPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payroll/revisions"
+          element={
+            <PermissionRoute permission={PERMISSIONS.PAYROLL_VIEW}>
+              <PayrollRevisionsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="payroll/settings"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.PAYROLL_SETTINGS_MANAGE, PERMISSIONS.PAYROLL_MANAGE]}
+            >
+              <PayrollSettingsPage />
             </PermissionRoute>
           }
         />
