@@ -25,10 +25,11 @@ export function AttendanceStatCards({
     { title: 'Half Day', value: stats.halfDay, icon: CloudSun },
     { title: 'On Leave', value: stats.onLeave, icon: CalendarDays },
     { title: 'Not Marked', value: stats.notMarked, icon: CircleHelp },
+    { title: 'Week Off / Holiday', value: stats.weekOff + stats.holiday, icon: CalendarDays },
   ]
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4">
       {items.map((item) => (
         <StatCard
           key={item.title}

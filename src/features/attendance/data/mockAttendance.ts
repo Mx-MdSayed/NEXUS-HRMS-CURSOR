@@ -3,7 +3,7 @@ import { enrichAttendanceMetrics, isWeekOff, toDateKey } from '../utils/calculat
 import type { AttendanceCorrection, AttendanceRecord, AttendanceAuditEvent } from '../types'
 import { initialHolidays } from './mockHolidays'
 
-const TODAY = '2026-08-08'
+const TODAY = '2026-08-07'
 const employeeIds = [
   'emp-1001',
   'emp-1002',
