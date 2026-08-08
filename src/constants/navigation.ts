@@ -56,7 +56,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Payroll',
     path: '/payroll',
     icon: 'Wallet',
-    module: 'Module 8',
+    module: 'Later module',
     requiredPermission: PERMISSIONS.PAYROLL_VIEW,
   },
   {
@@ -65,7 +65,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     selfServiceLabel: 'My Payslips',
     path: '/payslips',
     icon: 'FileText',
-    module: 'Module 8',
+    module: 'Later module',
     requiredPermission: PERMISSIONS.PAYSLIP_VIEW,
   },
   {

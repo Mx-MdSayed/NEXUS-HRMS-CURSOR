@@ -760,6 +760,133 @@ export const attendanceService = {
     return structuredClone(rows)
   },
 
+  /**
+   * Mark working days as On Leave for an approved leave request.
+   * Does not overwrite holiday / week_off records.
+   * Simulates transactional behavior for mock data consistency.
+   */
+  async applyApprovedLeave(
+    employeeId: string,
+    workingDates: string[],
+    leaveRequestId: string,
+    actorName = 'System',
+  ): Promise<void> {
+    await delay(80)
+    const nowIso = new Date().toISOString()
+    for (const date of workingDates) {
+      const holiday = findHoliday(date, holidaysDb)
+      const weekOff = isWeekOff(date)
+      if (holiday || weekOff) continue
+
+      const existing = findRecord(employeeId, date)
+      const remarks = `On leave (request ${leaveRequestId})`
+
+      if (existing) {
+        if (existing.status === 'holiday' || existing.status === 'week_off') continue
+        const previous = existing.status
+        const updated: AttendanceRecord = {
+          ...existing,
+          status: 'on_leave',
+          checkIn: undefined,
+          checkOut: undefined,
+          workMinutes: 0,
+          overtimeMinutes: 0,
+          lateMinutes: 0,
+          earlyLeaveMinutes: 0,
+          remarks,
+          source: 'leave',
+          updatedAt: nowIso,
+          updatedBy: actorName,
+        }
+        upsertRecord(updated)
+        pushAudit({
+          attendanceId: updated.id,
+          employeeId,
+          date,
+          action: 'leave_approved',
+          oldValue: previous,
+          newValue: 'on_leave',
+          changedBy: actorName,
+          reason: leaveRequestId,
+        })
+      } else {
+        const created: AttendanceRecord = {
+          id: `att-${crypto.randomUUID().slice(0, 8)}`,
+          employeeId,
+          date,
+          status: 'on_leave',
+          workMinutes: 0,
+          overtimeMinutes: 0,
+          lateMinutes: 0,
+          earlyLeaveMinutes: 0,
+          remarks,
+          source: 'leave',
+          createdAt: nowIso,
+          updatedAt: nowIso,
+          createdBy: actorName,
+          updatedBy: actorName,
+        }
+        upsertRecord(created)
+        pushAudit({
+          attendanceId: created.id,
+          employeeId,
+          date,
+          action: 'leave_approved',
+          newValue: 'on_leave',
+          changedBy: actorName,
+          reason: leaveRequestId,
+        })
+      }
+    }
+  },
+
+  /**
+   * Restore attendance after approved leave cancellation.
+   * Clears On Leave records created/updated by leave; does not touch holiday/week_off.
+   */
+  async clearApprovedLeave(
+    employeeId: string,
+    workingDates: string[],
+    leaveRequestId: string,
+    actorName = 'System',
+  ): Promise<void> {
+    await delay(80)
+    const nowIso = new Date().toISOString()
+    for (const date of workingDates) {
+      const existing = findRecord(employeeId, date)
+      if (!existing) continue
+      if (existing.status !== 'on_leave') continue
+      if (existing.source !== 'leave' && !existing.remarks?.includes(leaveRequestId)) continue
+
+      const previous = existing.status
+      const updated: AttendanceRecord = {
+        ...existing,
+        status: 'absent',
+        checkIn: undefined,
+        checkOut: undefined,
+        workMinutes: 0,
+        overtimeMinutes: 0,
+        lateMinutes: 0,
+        earlyLeaveMinutes: 0,
+        remarks: `Leave cancelled (${leaveRequestId})`,
+        source: 'leave',
+        updatedAt: nowIso,
+        updatedBy: actorName,
+      }
+      upsertRecord(updated)
+      pushAudit({
+        attendanceId: updated.id,
+        employeeId,
+        date,
+        action: 'leave_cancelled',
+        oldValue: previous,
+        newValue: 'absent',
+        changedBy: actorName,
+        reason: leaveRequestId,
+      })
+    }
+  },
+
   formatWorkHours(minutes: number): string {
     return formatWorkDuration(minutes)
   },

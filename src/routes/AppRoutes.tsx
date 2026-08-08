@@ -26,6 +26,17 @@ import {
   EmployeeAttendancePage,
   TodayAttendancePage,
 } from '@/features/attendance'
+import {
+  LeaveApplyPage,
+  LeaveBalancesPage,
+  LeaveCalendarPage,
+  LeaveDetailPage,
+  LeaveEditPage,
+  LeaveIndexPage,
+  LeaveMyPage,
+  LeaveRequestsPage,
+  LeaveTypesPage,
+} from '@/features/leave'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -233,11 +244,73 @@ export function AppRoutes() {
           path="leave"
           element={
             <PermissionRoute permission={PERMISSIONS.LEAVE_VIEW}>
-              <PlaceholderPage
-                title="Leave Management"
-                moduleLabel="Module 8"
-                description="Leave policies, requests, and approvals will be implemented in a later module."
-              />
+              <LeaveIndexPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="leave/apply"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.LEAVE_APPLY, PERMISSIONS.LEAVE_CREATE]}>
+              <LeaveApplyPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="leave/my"
+          element={
+            <PermissionRoute permission={PERMISSIONS.LEAVE_VIEW}>
+              <LeaveMyPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="leave/calendar"
+          element={
+            <PermissionRoute permission={PERMISSIONS.LEAVE_VIEW}>
+              <LeaveCalendarPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="leave/requests"
+          element={
+            <PermissionRoute permission={PERMISSIONS.LEAVE_VIEW}>
+              <LeaveRequestsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="leave/types"
+          element={
+            <PermissionRoute permission={[PERMISSIONS.LEAVE_TYPE_MANAGE, PERMISSIONS.LEAVE_MANAGE]}>
+              <LeaveTypesPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="leave/balances"
+          element={
+            <PermissionRoute
+              permission={[PERMISSIONS.LEAVE_BALANCE_MANAGE, PERMISSIONS.LEAVE_MANAGE]}
+            >
+              <LeaveBalancesPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="leave/:id/edit"
+          element={
+            <PermissionRoute permission={PERMISSIONS.LEAVE_EDIT}>
+              <LeaveEditPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="leave/:id"
+          element={
+            <PermissionRoute permission={PERMISSIONS.LEAVE_VIEW}>
+              <LeaveDetailPage />
             </PermissionRoute>
           }
         />
@@ -247,8 +320,8 @@ export function AppRoutes() {
             <PermissionRoute permission={PERMISSIONS.PAYROLL_VIEW}>
               <PlaceholderPage
                 title="Payroll"
-                moduleLabel="Module 8"
-                description="Salary structures and payroll processing will be implemented in Module 8."
+                moduleLabel="Later module"
+                description="Salary structures and payroll processing will be implemented in a later module."
               />
             </PermissionRoute>
           }
@@ -259,8 +332,8 @@ export function AppRoutes() {
             <PermissionRoute permission={PERMISSIONS.PAYSLIP_VIEW}>
               <PlaceholderPage
                 title="Payslips"
-                moduleLabel="Module 8"
-                description="Payslip generation and employee access will be implemented in Module 8."
+                moduleLabel="Later module"
+                description="Payslip generation and employee access will be implemented in a later module."
               />
             </PermissionRoute>
           }

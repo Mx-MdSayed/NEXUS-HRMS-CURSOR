@@ -26,6 +26,7 @@ export const ATTENDANCE_SOURCE_LABELS: Record<AttendanceSource, string> = {
   admin_entry: 'Admin Entry',
   correction: 'Correction',
   import: 'Import',
+  leave: 'Leave',
 }
 
 export const CORRECTION_STATUS_LABELS: Record<CorrectionRequestStatus, string> = {

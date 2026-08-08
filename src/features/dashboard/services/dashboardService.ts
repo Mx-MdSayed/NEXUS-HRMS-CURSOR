@@ -5,6 +5,8 @@ import { employeeService } from '@/features/employees'
 import { departmentService } from '@/features/organization/services/departmentService'
 import { listActiveDepartmentOptions } from '@/features/organization/data/orgDb'
 import { attendanceService } from '@/features/attendance/services/attendanceService'
+import { leaveService } from '@/features/leave/services/leaveService'
+import { LEAVE_REQUEST_STATUSES } from '@/features/leave/constants'
 import { format } from 'date-fns'
 
 function delay(ms = 500): Promise<void> {
@@ -123,6 +125,47 @@ export const dashboardService: DashboardService = {
       // Keep mock attendance values if attendance service is unavailable.
     }
 
+    try {
+      const [overview, pendingRequests, upcoming] = await Promise.all([
+        leaveService.getOverviewStats(),
+        leaveService.getLeaveRequests({ status: LEAVE_REQUEST_STATUSES.PENDING }, 1, 5),
+        leaveService.getUpcomingLeave(5),
+      ])
+      data.leaveSummary = {
+        pending: overview.pending,
+        approved: overview.approved,
+        rejected: overview.rejected,
+        onLeaveToday: overview.onLeaveToday || data.leaveSummary.onLeaveToday,
+      }
+      if (pendingRequests.data.length > 0) {
+        data.recentLeaveRequests = pendingRequests.data.map((item) => ({
+          id: item.id,
+          employeeName: item.employeeName,
+          employeeId: item.employeeCode,
+          leaveType: item.leaveTypeName,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          durationDays: item.duration,
+          status: item.status === 'pending' || item.status === 'approved' || item.status === 'rejected'
+            ? item.status
+            : 'pending',
+        }))
+      } else if (upcoming.length > 0) {
+        data.recentLeaveRequests = upcoming.map((item) => ({
+          id: item.id,
+          employeeName: item.employeeName,
+          employeeId: item.employeeId,
+          leaveType: item.leaveTypeName,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          durationDays: item.duration,
+          status: 'approved' as const,
+        }))
+      }
+    } catch {
+      // Keep mock leave summary if leave service is unavailable.
+    }
+
     return data
   },
 
@@ -162,6 +205,31 @@ export const dashboardService: DashboardService = {
       }
     } catch {
       // Keep mock employee attendance if service unavailable.
+    }
+
+    try {
+      const employeeId = await leaveService.resolveLinkedEmployeeId(user)
+      if (!employeeId) return data
+      const [balances, overview, types] = await Promise.all([
+        leaveService.getEmployeeLeaveBalances(employeeId),
+        leaveService.getOverviewStats(employeeId),
+        leaveService.getLeaveTypes(true),
+      ])
+      if (balances.length > 0) {
+        data.leaveBalances = balances.map((item) => {
+          const type = types.find((t) => t.id === item.leaveTypeId)
+          return {
+            type: type?.name ?? item.leaveTypeId,
+            remaining: item.available,
+            total: item.allocated + item.carryForward + item.openingBalance + item.adjustment,
+          }
+        })
+      }
+      data.pendingLeaveCount = overview.pending
+      const applyAction = data.quickActions.find((item) => item.id === 'apply-leave')
+      if (applyAction) applyAction.path = '/leave/apply'
+    } catch {
+      // Keep mock employee leave if service unavailable.
     }
 
     return data

@@ -13,6 +13,7 @@ export type AttendanceSource =
   | 'admin_entry'
   | 'correction'
   | 'import'
+  | 'leave'
 
 export type CorrectionRequestStatus = 'pending' | 'approved' | 'rejected'
 export type HolidayType = 'public' | 'company' | 'optional'

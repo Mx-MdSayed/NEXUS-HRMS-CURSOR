@@ -19,6 +19,8 @@ export type StatusTone =
   | 'holiday'
   | 'week_off'
   | 'not_marked'
+  | 'cancelled'
+  | 'withdrawn'
 
 const statusConfig: Record<StatusTone, { label: string; variant: BadgeVariant }> = {
   active: { label: 'Active', variant: 'success' },
@@ -39,6 +41,8 @@ const statusConfig: Record<StatusTone, { label: string; variant: BadgeVariant }>
   holiday: { label: 'Holiday', variant: 'neutral' },
   week_off: { label: 'Week Off', variant: 'neutral' },
   not_marked: { label: 'Not Marked', variant: 'neutral' },
+  cancelled: { label: 'Cancelled', variant: 'neutral' },
+  withdrawn: { label: 'Withdrawn', variant: 'neutral' },
 }
 
 export interface StatusBadgeProps {
