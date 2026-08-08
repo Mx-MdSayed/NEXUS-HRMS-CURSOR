@@ -1,11 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { flexRender, type ColumnVisibilityState, type SortingState } from '@tanstack/react-table'
-import {
-  getCoreRowModel,
-  legacyCreateColumnHelper,
-  useLegacyTable,
-} from '@tanstack/react-table/legacy'
+import { getCoreRowModel, useLegacyTable } from '@tanstack/react-table/legacy'
 import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Search } from 'lucide-react'
 import { Button, Card, CardContent, EmptyState, Input } from '@/components/ui'
 
@@ -58,15 +54,14 @@ export function ReportTable<T extends object>({
   const paginated = sorted.slice((safePage - 1) * pageSize, safePage * pageSize)
 
   const tableColumns = useMemo(() => {
-    const columnHelper = legacyCreateColumnHelper<T>()
-    return columns.map((column) =>
-      columnHelper.accessor(column.key as never, {
+    return columns.map((column) => ({
         id: String(column.key),
+        accessorKey: String(column.key),
         header: column.header,
         enableHiding: column.enableHiding ?? true,
-        cell: (info) => (column.render ? column.render(info.row.original) : String(info.getValue() ?? '—')),
-      }),
-    )
+        cell: (info: { row: { original: T }; getValue: () => unknown }) =>
+          column.render ? column.render(info.row.original) : String(info.getValue() ?? '—'),
+      }))
   }, [columns])
 
   const table = useLegacyTable({

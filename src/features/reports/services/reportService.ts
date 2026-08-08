@@ -325,8 +325,7 @@ export const reportService = {
       ...row,
       departmentName: departmentNames.get(row.departmentId) ?? row.departmentName,
     }))
-    const departmentTotals = Array.from(
-      enrichedRows.reduce((map, row) => {
+    const departmentTotalsMap = enrichedRows.reduce((map, row) => {
         const key = `${row.departmentId}-${row.currency}`
         const current = map.get(key) ?? {
           departmentId: row.departmentId,
@@ -351,8 +350,8 @@ export const reportService = {
         monthlyGross: number
         monthlyNet: number
         annualCTC: number
-      }>()),
-    ).values())
+      }>())
+    const departmentTotals = Array.from(departmentTotalsMap.values())
     return {
       rows: enrichedRows,
       totalsByCurrency: salaryTotals(enrichedRows),
