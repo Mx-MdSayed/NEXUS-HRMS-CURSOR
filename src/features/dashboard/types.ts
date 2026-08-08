@@ -58,7 +58,7 @@ export interface RecentEmployee {
   name: string
   department: string
   joiningDate: string
-  status: 'active' | 'inactive'
+  status: import('@/types').EmploymentStatus
   avatarUrl?: string
 }
 

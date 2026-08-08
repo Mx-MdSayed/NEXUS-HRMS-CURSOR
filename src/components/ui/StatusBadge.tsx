@@ -13,6 +13,9 @@ export type StatusTone =
   | 'absent'
   | 'late'
   | 'half_day'
+  | 'probation'
+  | 'on_leave'
+  | 'terminated'
 
 const statusConfig: Record<StatusTone, { label: string; variant: BadgeVariant }> = {
   active: { label: 'Active', variant: 'success' },
@@ -27,6 +30,9 @@ const statusConfig: Record<StatusTone, { label: string; variant: BadgeVariant }>
   absent: { label: 'Absent', variant: 'danger' },
   late: { label: 'Late', variant: 'warning' },
   half_day: { label: 'Half Day', variant: 'info' },
+  probation: { label: 'Probation', variant: 'warning' },
+  on_leave: { label: 'On Leave', variant: 'info' },
+  terminated: { label: 'Terminated', variant: 'danger' },
 }
 
 export interface StatusBadgeProps {

@@ -1,6 +1,13 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/components/layouts'
 import { PERMISSIONS } from '@/constants/permissions'
+import {
+  EmployeeCreatePage,
+  EmployeeDirectoryGuard,
+  EmployeeEditPage,
+  EmployeeListPage,
+  EmployeeProfilePage,
+} from '@/features/employees'
 import { AccessDeniedPage } from '@/pages/AccessDeniedPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -63,12 +70,32 @@ export function AppRoutes() {
         <Route
           path="employees"
           element={
+            <EmployeeDirectoryGuard>
+              <EmployeeListPage />
+            </EmployeeDirectoryGuard>
+          }
+        />
+        <Route
+          path="employees/new"
+          element={
+            <PermissionRoute permission={PERMISSIONS.EMPLOYEE_CREATE}>
+              <EmployeeCreatePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employees/:id"
+          element={
             <PermissionRoute permission={PERMISSIONS.EMPLOYEE_VIEW}>
-              <PlaceholderPage
-                title="Employee Management"
-                moduleLabel="Module 5"
-                description="Employee CRUD, profiles, and directory features will be built in Module 5."
-              />
+              <EmployeeProfilePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="employees/:id/edit"
+          element={
+            <PermissionRoute permission={PERMISSIONS.EMPLOYEE_EDIT}>
+              <EmployeeEditPage />
             </PermissionRoute>
           }
         />
@@ -78,8 +105,8 @@ export function AppRoutes() {
             <PermissionRoute permission={PERMISSIONS.DEPARTMENT_VIEW}>
               <PlaceholderPage
                 title="Departments"
-                moduleLabel="Module 5"
-                description="Department structure and org hierarchy management will arrive with Module 5."
+                moduleLabel="Module 6"
+                description="Department structure and org hierarchy management will arrive with Module 6."
               />
             </PermissionRoute>
           }
@@ -90,8 +117,8 @@ export function AppRoutes() {
             <PermissionRoute permission={PERMISSIONS.DESIGNATION_VIEW}>
               <PlaceholderPage
                 title="Designations"
-                moduleLabel="Module 5"
-                description="Job titles and designation management will arrive with Module 5."
+                moduleLabel="Module 6"
+                description="Job titles and designation management will arrive with Module 6."
               />
             </PermissionRoute>
           }
